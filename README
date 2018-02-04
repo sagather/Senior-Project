@@ -1,0 +1,27 @@
+All right ladies and gents, we're going to be working out the stylistic details here for consistency
+
+Global Variables:
+
+_varName
+
+Common Variables:
+
+..varName
+
+Method Naming:
+
+intentRevealingMethodName()
+
+Class Naming:
+
+IntentRevealingClassName
+
+File Naming:
+
+file-name.txt
+
+Miscellaneous:
+
+-after each line, use a semicolon
+-use curly brackets to denote loop beginning and ends
+-use curly brackets to denote class and method beginning and ends
