@@ -1,5 +1,7 @@
 
 #Tester for fullbody tracking using haar cascades and openCV
+#Doesn't really seem to work correctly just yet but I'll keep working on it
+#Most of the code from https://www.youtube.com/watch?v=88HdqNDQsEk&t=155s
 
 import cv2
 import numpy
