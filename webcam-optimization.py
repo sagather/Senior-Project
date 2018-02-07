@@ -23,6 +23,7 @@ while True:
 #    cv2.imshow('grayScale', grayScale);
     cv2.imshow('threshold', threshold);
     cv2.imshow('laplacian', laplacian);
+    #   I really don't like the edges one as much.  It losees track of things pretty quickly
     cv2.imshow('edges', edges);
 #    cv2.imshow('sobelx', sobelx);
 #    cv2.imshow('sobely', sobely);
