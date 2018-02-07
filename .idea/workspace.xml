@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bc2e01ef-d3a1-4a0f-923f-7cef6c3487e7" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Senior-Project.iml" afterPath="$PROJECT_DIR$/.idea/Senior-Project.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/webcam-optimization.py" afterPath="$PROJECT_DIR$/webcam-optimization.py" />
     </list>
@@ -29,8 +27,8 @@
       <file leaf-file-name="webcam-optimization.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/webcam-optimization.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="151">
-              <caret line="12" column="50" lean-forward="false" selection-start-line="12" selection-start-column="50" selection-end-line="12" selection-end-column="50" />
+            <state relative-caret-position="219">
+              <caret line="16" column="93" lean-forward="false" selection-start-line="16" selection-start-column="93" selection-end-line="16" selection-end-column="93" />
               <folding>
                 <element signature="e#169#179#0" expanded="true" />
               </folding>
@@ -314,7 +312,14 @@
       <option name="project" value="LOCAL" />
       <updated>1517715904956</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added grayscale and b/w capabilities">
+      <created>1518039439817</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1518039439817</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -348,7 +353,8 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="Beep" />
     <MESSAGE value="Updated for a readme, added basic webcam access" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated for a readme, added basic webcam access" />
+    <MESSAGE value="Added grayscale and b/w capabilities" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added grayscale and b/w capabilities" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -477,8 +483,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/webcam-optimization.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="151">
-          <caret line="12" column="50" lean-forward="false" selection-start-line="12" selection-start-column="50" selection-end-line="12" selection-end-column="50" />
+        <state relative-caret-position="219">
+          <caret line="16" column="93" lean-forward="false" selection-start-line="16" selection-start-column="93" selection-end-line="16" selection-end-column="93" />
           <folding>
             <element signature="e#169#179#0" expanded="true" />
           </folding>
