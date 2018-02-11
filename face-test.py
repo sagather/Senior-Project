@@ -21,24 +21,20 @@ while rval:
     facesDetected = face_cascade.detectMultiScale(grayFeed, 1.3, 5)
     for (x,y,w,h) in facesDetected:
         cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2)
-        roiGray = grayFeed[y:y+h, x:x+w]
+        roiGray = grayFeed[y:y+(h/2), x:x+w]
         roiColor = frame[y:y+h, x:x+w]
 
         # Detect eyes using haarcascade_eye.xml
         eyesDetected = eye_cascade.detectMultiScale(roiGray)
         for (ex,ey,ew,eh) in eyesDetected:
             cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0,255,0), 1)
-        # Detect left eyes
-        leftEyesDetected = leftEye_cascade.detectMultiScale(roiGray)
-        for (ex, ey, ew, eh) in leftEyesDetected:
-            cv2.rectangle(roiColor, (ex, ey), (ex + ew, ey + eh), (0, 0, 255), 1)
-        # detect right eyes
-        rightEyesDetected = rightEye_cascade.detectMultiScale(roiGray)
-        for (ex, ey, ew, eh) in rightEyesDetected:
-            cv2.rectangle(roiColor, (ex, ey), (ex + ew, ey + eh), (255, 255, 255), 1)
+
 
     # blue box = faces, green = eyes, red = left eyes, white = right eyes
     cv2.imshow("preview", frame)
+    cv2.imshow("grayFeed", grayFeed);
+    cv2.imshow("roiGray", roiGray);
+    cv2.imshow("roiColor", roiColor);
 
 
     key = cv2.waitKey(20)
