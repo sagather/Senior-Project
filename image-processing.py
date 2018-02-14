@@ -7,6 +7,7 @@ import time;
 
 _faceCascade = cv2.CascadeClassifier('HaarCascades/haarcascade_frontalface_default.xml');
 _eyeCascade = cv2.CascadeClassifier('HaarCascades/haarcascade_eye.xml');
+text = "";
 
 def processImages(grayFeed):
     facesDetected = _faceCascade.detectMultiScale(grayFeed, 1.3, 5);
@@ -23,6 +24,11 @@ def processImages(grayFeed):
         #   inner for loop begin
         for (ex, ey, ew, eh) in eyesDetected:
             cv2.rectangle(roiColor, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 1);
+
+        cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+            (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
         cv2.imshow("Security Feed", frame)
         cv2.imshow("Thresh", thresh)
@@ -75,13 +81,6 @@ while True:
     for c in cnts:
         if cv2.contourArea(c) < args["min_area"]:
             continue
-
-    cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-    cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
-
-
 
     cv2.imshow('face processed', processImages(grayscale));
 
