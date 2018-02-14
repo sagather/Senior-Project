@@ -8,6 +8,7 @@
 # this code was obtained from:
 #       https://stackoverflow.com/questions/604749/how-do-i-access-my-webcam-in-python
 
+import numpy
 import cv2
 
 cv2.namedWindow("preview")

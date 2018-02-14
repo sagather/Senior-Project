@@ -23,5 +23,4 @@ file-name.txt
 Miscellaneous:
 
 -after each line, use a semicolon
--use curly brackets to denote loop beginning and ends
--use curly brackets to denote class and method beginning and ends
+-Loop beginnings and ends will be marked with a brief comment #     __(loop type)__ loop begin/end
