@@ -24,6 +24,9 @@ while rval:
         roiGray = grayFeed[y:y+(h/2), x:x+w]
         roiColor = frame[y:y+h, x:x+w]
 
+        cv2.imshow("roiGray", roiGray);
+        cv2.imshow("roiColor", roiColor);
+
         # Detect eyes using haarcascade_eye.xml
         eyesDetected = eye_cascade.detectMultiScale(roiGray)
         for (ex,ey,ew,eh) in eyesDetected:
@@ -33,8 +36,6 @@ while rval:
     # blue box = faces, green = eyes, red = left eyes, white = right eyes
     cv2.imshow("preview", frame)
     cv2.imshow("grayFeed", grayFeed);
-    cv2.imshow("roiGray", roiGray);
-    cv2.imshow("roiColor", roiColor);
 
     key = cv2.waitKey(20)
     if key == 27:  # exit on ESC
