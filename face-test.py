@@ -9,8 +9,11 @@ rightEye_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_righteye_2spl
 
 originalFeed = cv2.VideoCapture(0)
 
+
 if originalFeed.isOpened():  # try to get the first frame
     rval, frame = originalFeed.read()
+    #feedWidth = originalFeed.get(3)
+    #feedHeight = originalFeed.get(4)
 else:
     rval = False
 
@@ -21,6 +24,13 @@ while rval:
     facesDetected = face_cascade.detectMultiScale(grayFeed, 1.3, 5)
     for (x,y,w,h) in facesDetected:
         cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2)
+        #Top
+        cv2.rectangle(frame, (x+(w/2),y), (x-(2*w), y+(2*h)), (0, 255, 0), 2) #To the left of face as displayed on  (Green)
+        cv2.rectangle(frame, (x+(w/2),y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2) #To the right of face as displayed on webcam (Red)
+        #Bottom
+        cv2.rectangle(frame, (x+(w/2),y+(2*h)), (x+(2*w)+w, y+(4*h)), (0, 255,0), 2) #To the left of face as displayed on webcam (Green)
+        cv2.rectangle(frame, (x+(w/2),y+(2*h)), (x-(2*w), y+(4*h)), (0, 0,255), 2) #To the right of face as displayed on webcam
+
         roiGray = grayFeed[y:y+(h/2), x:x+w]
         roiColor = frame[y:y+h, x:x+w]
 
