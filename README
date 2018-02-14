@@ -24,3 +24,10 @@ Miscellaneous:
 
 -after each line, use a semicolon
 -Loop beginnings and ends will be marked with a brief comment #     __(loop type)__ loop begin/end
+
+Detection Commands:
+
+-Right:                                             hand in box
+-Left:                                              hand in other box
+-Accelerate (negative acceleration is reverse):     both hands in boxes
+-Stop:                                              hands in toward chest, cannot be detected
