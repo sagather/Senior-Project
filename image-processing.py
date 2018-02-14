@@ -24,6 +24,10 @@ def processImages(grayFeed):
         for (ex, ey, ew, eh) in eyesDetected:
             cv2.rectangle(roiColor, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 1);
 
+        cv2.imshow("Security Feed", frame)
+        cv2.imshow("Thresh", thresh)
+        cv2.imshow("Frame Delta", frameDelta)
+
         text = "Occupied"
 
         #inner for loop end
@@ -57,7 +61,9 @@ while True:
     text = "Neutral";
     grayscale = makeGrayscale(frame);
 
-    firstframe = grayscale;
+    if(firstframe is None):
+        firstframe = grayscale;
+        continue;
 
     frameDelta = cv2.absdiff(firstframe, grayscale);
     thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
@@ -80,12 +86,6 @@ while True:
     cv2.imshow('face processed', processImages(grayscale));
 
     cv2.imshow('grayscale', grayscale);
-
-    cv2.imshow("Security Feed", frame)
-    cv2.imshow("Thresh", thresh)
-    cv2.imshow("Frame Delta", frameDelta)
-
-
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break;
