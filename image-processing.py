@@ -42,6 +42,7 @@ _videoCapture = cv2.VideoCapture(0);
 while True:
 
     ret, frame = _videoCapture.read();
+    text = "Neutral";
     grayscale = makeGrayscale(frame);
 
     cv2.imshow('face processed', processImages(grayscale));
