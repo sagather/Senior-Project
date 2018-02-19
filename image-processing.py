@@ -5,6 +5,8 @@ import cv2
 import argparse
 import datetime
 import imutils
+
+#unnecessary, may be removed in later versionings
 import time
 import numpy as np
 
@@ -43,10 +45,39 @@ def firstFrame():
 
 
 #TODO: FACE DETECTION FUNTCION
+def faceDetect():
 
+    facesDetected = _face_cascade.detectMultiScale(gray, 1.3, 5)
+    for (x,y,w,h) in facesDetected:
+        cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2)
+        #Top
+        cv2.rectangle(frame, (x+(w/2),y), (x-(2*w), y+(2*h)), (0, 255, 0), 2) #To the left of face as displayed on  (Green)
+        cv2.rectangle(frame, (x+(w/2),y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2) #To the right of face as displayed on webcam (Red)
+        #Bottom
+        cv2.rectangle(frame, (x+(w/2),y+(2*h)), (x+(2*w)+w, y+(4*h)), (0, 255,0), 2) #To the left of face as displayed on webcam (Green)
+        cv2.rectangle(frame, (x+(w/2),y+(2*h)), (x-(2*w), y+(4*h)), (0, 0,255), 2) #To the right of face as displayed on webcam
 
+        roiGray = gray[y:y+(h/2), x:x+w]
+        roiColor = frame[y:y+h, x:x+w]
+
+        cv2.imshow("roiGray", roiGray);
+        cv2.imshow("roiColor", roiColor);
+
+        # Detect eyes using haarcascade_eye.xml
+        eyesDetected = _eye_cascade.detectMultiScale(roiGray)
+        for (ex,ey,ew,eh) in eyesDetected:
+            cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0,255,0), 1)
+
+#TODO:  ESCAPE FUNCTION
+
+def end():
+
+    _originalFeed.release()
+    cv2.destroyAllWindows()
 
 #TODO:  MAIN FUNCTION
+
+rval, frame = _originalFeed.read()
 
 while rval:
     rval, frame = _originalFeed.read()
@@ -55,11 +86,11 @@ while rval:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-    if firstFrame is None:
-        firstFrame = gray
+    if _firstFrame is None:
+        _firstFrame = gray
         continue
 
-    frameDelta = cv2.absdiff(firstFrame, gray)
+    frameDelta = cv2.absdiff(_firstFrame, gray)
     thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
@@ -80,3 +111,11 @@ while rval:
         cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
                     (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
+    cv2.imshow("preview", frame)
+    cv2.imshow("grayFeed", gray);
+
+    key = cv2.waitKey(20)
+    if key == 27:  # exit on ESC
+        break
+
+end()
