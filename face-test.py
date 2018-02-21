@@ -44,6 +44,8 @@ while rval:
 
     thresh = cv2.dilate(thresh, None, iterations=2)
 
+    #Array to hold motion states of quadrants
+    motion = [0,0,0,0]
 
 #Face Detection
     facesDetected = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -75,13 +77,21 @@ while rval:
             # Something Like this to check for specific motion?
             if (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y and my <= y+(2*h)):
                 text = "                    Motion Top Right"
+                motion[1] = 1
             elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y and my <= y+(2*h)):
                 text = "Motion Top Left"
+                motion[0] = 1
             elif (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y + (2 * h) and my <= y + (4 * h)):
                 text = "                    Motion Bottom Right"
+                motion[3] = 1
             elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y+(2*h) and my <= y+(4*h)):
                 text = "Motion Bottom Left"
+                motion[2] = 1
 
+            if motion[0] == 1 and motion[1] == 1:
+                text = "    Motion BOTH Top"
+            if motion[2] == 1 and motion[3] == 1:
+                text = "    Motion BOTH Bottom"
 
     # blue box = faces, green = eyes, red = left eyes, white = right eyes
 
