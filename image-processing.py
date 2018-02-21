@@ -41,7 +41,12 @@ def firstFrame():
 
 
 #TODO:  PUT TEXT INTO FRAME
-
+def putTextOnFrame():
+    text = "Motion Detected"
+    cv2.putText(frame, "Frame Status: {}".format(text), (10, 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
 
 #TODO: FACE DETECTION FUNTCION
@@ -102,14 +107,8 @@ while rval:
 
         (mx, my, mw, mh) = cv2.boundingRect(c)
         cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
-        text = "Motion Detected"
 
-        # draw the text and timestamp on the frame
-        #may not be needed, but may be useful for Sam
-        cv2.putText(frame, "Frame Status: {}".format(text), (10, 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                    (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+        putTextOnFrame()
 
     cv2.imshow("preview", frame)
     cv2.imshow("grayFeed", gray);
