@@ -39,7 +39,7 @@ def firstFrame():
 
 
 #TODO:  PUT TEXT INTO FRAME
-def updateFrameStatusTextOnFrame(statusStr)
+def updateFrameStatusTextOnFrame(statusStr):
     cv2.putText(frame, "Frame Status: {}".format(statusStr), (10, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
