@@ -46,22 +46,7 @@ while rval:
     thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
 
     thresh = cv2.dilate(thresh, None, iterations=2)
-    (_,cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    for c in cnts:
-        if cv2.contourArea(c) < args["min_area"]:
-            continue
-
-        (mx, my, mw, mh) = cv2.boundingRect(c)
-        cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
-        text = "Motion Detected"
-
-        # draw the text and timestamp on the frame
-        #may not be needed, but may be useful for Sam
-        cv2.putText(frame, "Frame Status: {}".format(text), (10, 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                    (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
 #Face Detection
     facesDetected = face_cascade.detectMultiScale(gray, 1.3, 5)
@@ -84,6 +69,29 @@ while rval:
         eyesDetected = eye_cascade.detectMultiScale(roiGray)
         for (ex,ey,ew,eh) in eyesDetected:
             cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0,255,0), 1)
+
+        (_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for c in cnts:
+            if cv2.contourArea(c) < args["min_area"]:
+                continue
+
+            (mx, my, mw, mh) = cv2.boundingRect(c)
+            cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
+            #text = "Motion Detected"
+
+            # Something Like this to check for specific motion?
+            if mx < x and my < y:
+                text = "Motion Top left"
+            elif mx > x and my > y:
+                text = "                Motion Top Right"
+
+
+            # draw the text and timestamp on the frame
+            # may not be needed, but may be useful for Sam
+            cv2.putText(frame, "Frame Status: {}".format(text), (10, 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                        (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
     # blue box = faces, green = eyes, red = left eyes, white = right eyes
     cv2.imshow("preview", frame)
