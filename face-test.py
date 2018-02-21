@@ -15,11 +15,8 @@ import numpy as np
 # Load in cascade files
 face_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_eye.xml')
-leftEye_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_lefteye_2splits.xml')
-rightEye_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_righteye_2splits.xml')
 
 originalFeed = cv2.VideoCapture(0)
-
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
@@ -65,12 +62,8 @@ while rval:
         cv2.imshow("roiGray", roiGray);
         cv2.imshow("roiColor", roiColor);
 
-        # Detect eyes using haarcascade_eye.xml
-        eyesDetected = eye_cascade.detectMultiScale(roiGray)
-        for (ex,ey,ew,eh) in eyesDetected:
-            cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0,255,0), 1)
-
         (_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
         for c in cnts:
             if cv2.contourArea(c) < args["min_area"]:
                 continue
@@ -80,21 +73,29 @@ while rval:
             #text = "Motion Detected"
 
             # Something Like this to check for specific motion?
-            if mx < x and my < y:
-                text = "Motion Top left"
-            elif mx > x and my > y:
-                text = "                Motion Top Right"
+            if (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y and my <= y+(2*h)):
+                text = "                    Motion Top Right"
+            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y and my <= y+(2*h)):
+                text = "Motion Top Left"
+            elif (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y + (2 * h) and my <= y + (4 * h)):
+                text = "                    Motion Bottom Right"
+            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y+(2*h) and my <= y+(4*h)):
+                text = "Motion Bottom Left"
 
-
-            # draw the text and timestamp on the frame
-            # may not be needed, but may be useful for Sam
-            cv2.putText(frame, "Frame Status: {}".format(text), (10, 20),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-            cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                        (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
     # blue box = faces, green = eyes, red = left eyes, white = right eyes
-    cv2.imshow("preview", frame)
+
+    # Flip frame then add text
+    horizontal = cv2.flip(frame, 1)
+
+    # draw the text and timestamp on the frame
+    # may not be needed, but may be useful for Sam
+    cv2.putText(horizontal, "Frame Status: {}".format(text), (10, 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(horizontal, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+
+    cv2.imshow("preview", horizontal)
     cv2.imshow("grayFeed", gray);
 
     key = cv2.waitKey(20)
