@@ -1,18 +1,15 @@
-#All import statements
+# All import statements
 
 import cv2
-#for motion detection
+# for motion detection
 import argparse
 import datetime
 import imutils
 
-#unnecessary, may be removed in later versionings
-import time
-import numpy as np
+# Referenced for motion detection:
+# https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 
-#Referenced for motion detection: https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
-
-#Might be needed later
+# Might be needed later
 #   _feedWidth = originalFeed.get(3)
 #   _feedHeight = originalFeed.get(4)
 
@@ -26,97 +23,83 @@ _ap = argparse.ArgumentParser()
 _ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
 _args = vars(_ap.parse_args())
 
-_firstFrame = None;
-_grayFrame = None;
-_frameText = "";
+_firstFrame = None
+_grayFrame = None
+_frameText = ""
 
-#TODO:  GET FIRST FRAME FUNCTION
+
 def firstFrame():
+    global _firstFrame
+    global _frameText
     if _originalFeed.isOpened():  # try to get the first frame
-        rval, frame = _originalFeed.read()
+        rvalLocal, _firstFrame = _originalFeed.read()
         _frameText = "No Motion"
-        return rval;
+        return rvalLocal
 
 
-#TODO:  PUT TEXT INTO FRAME
 def updateFrameStatusTextOnFrame(statusStr):
-    cv2.putText(frame, "Frame Status: {}".format(statusStr), (10, 20),
+    cv2.putText(_firstFrame, "Frame Status: {}".format(statusStr), (10, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
 
 def updateTimestampTextOnFrame():
-    cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+    cv2.putText(_firstFrame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                (10, _firstFrame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
 
-#TODO: FACE DETECTION FUNTCION
 def faceDetect():
-    facesDetected = _face_cascade.detectMultiScale(gray, 1.3, 5);
-    for (x,y,w,h) in facesDetected:
-        cv2.rectangle(_firstFrame, (x,y), (x+w, y+h), (255,0,0), 2);
-        #Top
-        cv2.rectangle(_firstFrame, (x+(w/2),y), (x-(2*w), y+(2*h)), (0, 255, 0), 2); #To the left of face as displayed on  (Green)
-        cv2.rectangle(_firstFrame, (x+(w/2),y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2); #To the right of face as displayed on webcam (Red)
-        #Bottom
-        cv2.rectangle(_firstFrame, (x+(w/2),y+(2*h)), (x+(2*w)+w, y+(4*h)), (0, 255,0), 2); #To the left of face as displayed on webcam (Green)
-        cv2.rectangle(_firstFrame, (x+(w/2),y+(2*h)), (x-(2*w), y+(4*h)), (0, 0,255), 2); #To the right of face as displayed on webcam
+    facesDetected = _face_cascade.detectMultiScale(_grayFrame, 1.3, 5)
+    for (x, y, w, h) in facesDetected:
+        cv2.rectangle(_firstFrame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        roiGray = _grayFrame[y:y+(h/2), x:x+w];
-        roiColor = _firstFrame[y:y+h, x:x+w];
-        
-        # show roi boxes
-        #cv2.imshow("roiGray", roiGray);
-        #cv2.imshow("roiColor", roiColor);
+        # Top
+        # To the left of face as displayed on  (Green)
+        cv2.rectangle(_firstFrame, (x+(w/2), y), (x-(2*w), y+(2*h)), (0, 255, 0), 2)
+        # To the right of face as displayed on webcam (Red)
+        cv2.rectangle(_firstFrame, (x+(w/2), y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2)
+        # Bottom
+        # To the left of face as displayed on webcam (Green)
+        cv2.rectangle(_firstFrame, (x+(w/2), y+(2*h)), (x+(2*w)+w, y+(4*h)), (0, 255, 0), 2)
+        # To the right of face as displayed on webcam
+        cv2.rectangle(_firstFrame, (x+(w/2), y+(2*h)), (x-(2*w), y+(4*h)), (0, 0, 255), 2)
+
+        # setup roi boxes
+        roiGray = _grayFrame[y:y+(h/2), x:x+w]
+        roiColor = _firstFrame[y:y+h, x:x+w]
 
         # Detect eyes using haarcascade_eye.xml
-        eyesDetected = _eye_cascade.detectMultiScale(roiGray);
-        for (ex,ey,ew,eh) in eyesDetected:
-            cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0,255,0), 1);
+        eyesDetected = _eye_cascade.detectMultiScale(roiGray)
+        for (ex, ey, ew, eh) in eyesDetected:
+            cv2.rectangle(roiColor, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 1)
 
-#TODO:  ESCAPE FUNCTION
 
 def end():
     _originalFeed.release()
     cv2.destroyAllWindows()
 
-#TODO:  MAIN FUNCTION
 
-rval, frame = _originalFeed.read()
+# MAIN FUNCTION
+rval = True
 
 while rval:
-    rval = firstFrame();
-
-    _firstFrame = imutils.resize(_firstFrame, width=500);
-    _grayFrame = cv2.cvtColor(_firstFrame, cv2.COLOR_BGR2GRAY);
-    #gray = cv2.GaussianBlur(gray, (21, 21), 0)
+    rval = firstFrame()
 
     if _firstFrame is None:
-        _firstFrame = _grayFrame;
-        continue;
+        print("Error: _firstFrame was not set")
+        break
 
-    #frameDelta = cv2.absdiff(_firstFrame, gray)
-    #thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+    _firstFrame = imutils.resize(_firstFrame, width=500)
+    _grayFrame = cv2.cvtColor(_firstFrame, cv2.COLOR_BGR2GRAY)
 
-    #thresh = cv2.dilate(thresh, None, iterations=2)
-    #(_,cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    #for c in cnts:
-    #    if cv2.contourArea(c) < _args["min_area"]:
-    #        continue
-    #
-    #    (mx, my, mw, mh) = cv2.boundingRect(c)
-    #    cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
+    faceDetect()
     
-    faceDetect();
+    updateFrameStatusTextOnFrame(_frameText)
+    updateTimestampTextOnFrame()
     
-    updateFrameStatusTextOnFrame(_frameText);
-    updateTimestampTextOnFrame();
-    
-    cv2.imshow("preview", _firstFrame);
-    cv2.imshow("grayFeed", _grayFrame);
+    cv2.imshow("preview", _firstFrame)
 
-    key = cv2.waitKey(20);
+    key = cv2.waitKey(20)
     if key == 27:  # exit on ESC
-        break;
+        break
 
-end();
+end()
