@@ -22,7 +22,6 @@ file-name.txt
 
 Miscellaneous:
 
--after each line, use a semicolon
 -Loop beginnings and ends will be marked with a brief comment #     __(loop type)__ loop begin/end
 
 Detection Commands:
