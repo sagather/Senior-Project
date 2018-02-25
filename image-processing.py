@@ -121,8 +121,8 @@ while rval:
         _firstFrame = _grayFrame
         continue
 
-    frameDelta = cv2.absdiff(_firstFrame, _grayFrame)
-    thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+    #frameDelta = cv2.absdiff(_firstFrame, _grayFrame)
+    thresh = cv2.threshold(_grayFrame, 25, 255, cv2.THRESH_BINARY)[1]
     thresh = cv2.dilate(thresh, None, iterations=2)
 
     _motionStateArray = [0, 0, 0, 0]
