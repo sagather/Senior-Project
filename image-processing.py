@@ -24,15 +24,17 @@ _args = vars(_ap.parse_args())
 
 _firstFrame = None
 _grayFrame = None
+_frame = None
+_thresh = None
 _frameText = ""
 _motionStateArray = [0, 0, 0, 0]
 
 
 def firstFrame():
-    global _firstFrame
+    global _frame
     global _frameText
     if _originalFeed.isOpened():  # try to get the first frame
-        rvalLocal, _firstFrame = _originalFeed.read()
+        rvalLocal, _frame = _originalFeed.read()
         _frameText = "No Motion"
         return rvalLocal
 
@@ -66,7 +68,7 @@ def faceDetect():
         cv2.rectangle(_firstFrame, (x+(w/2), y+(2*h)), (x-(2*w), y+(4*h)), (0, 0, 255), 2)
 
         #
-        (_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         #
         for c in cnts:
@@ -110,20 +112,21 @@ def end():
 rval = True
 
 while rval:
-    rval = firstFrame()
 
-    _firstFrame = imutils.resize(_firstFrame, width=500)
-    _grayFrame = cv2.cvtColor(_firstFrame, cv2.COLOR_BGR2GRAY)
-    _grayFrame = cv2.GaussianBlur(_grayFrame, (21, 21), 0)
+    rval, _frame = _originalFeed.read();
+
+    _frame = imutils.resize(_frame, width=500)
+    _grayFrame = cv2.cvtColor(_frame, cv2.COLOR_BGR2GRAY)
+    _grayFrame = cv2.GaussianBlur(_frame, (21, 21), 0)
 
 
     if _firstFrame is None:
         _firstFrame = _grayFrame
         continue
 
-    #frameDelta = cv2.absdiff(_firstFrame, _grayFrame)
-    thresh = cv2.threshold(_grayFrame, 25, 255, cv2.THRESH_BINARY)[1]
-    thresh = cv2.dilate(thresh, None, iterations=2)
+    frameDelta = cv2.absdiff(_firstFrame, _grayFrame)
+    _thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+    _thresh = cv2.dilate(_thresh, None, iterations=2)
 
     _motionStateArray = [0, 0, 0, 0]
 
