@@ -18,7 +18,7 @@ _face_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_frontalface_defa
 _originalFeed = cv2.VideoCapture(0)
 
 _ap = argparse.ArgumentParser()
-_ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
+_ap.add_argument("-a", "--min-area", type=int, default=4000, help="minimum area size")
 _args = vars(_ap.parse_args())
 
 _firstFrame = None
@@ -43,7 +43,7 @@ def main():
     while rval:
         rval, _frame = _originalFeed.read()
 
-        _frame = imutils.resize(_frame, width = 500)
+        _frame = imutils.resize(_frame, width = 1000)
         _grayFrame = cv2.cvtColor(_frame, cv2.COLOR_BGR2GRAY)
         _grayFrame = cv2.GaussianBlur(_grayFrame, (21,21), 0)
 
@@ -143,7 +143,7 @@ def displayProcessing():
 
     #if not _horizontal.data:
     cv2.imshow("preview", _horizontal)
-    cv2.imshow("grayFeed", _grayFrame);
+    #cv2.imshow("grayFeed", _grayFrame);
 
 def exitProcessing():
     global _originalFeed
