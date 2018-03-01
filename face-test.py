@@ -5,6 +5,7 @@ import datetime
 import imutils
 import time
 import numpy as np
+from Person import Person
 
 #Referenced for motion detection: https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 
@@ -23,6 +24,7 @@ ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area si
 args = vars(ap.parse_args())
 
 firstFrame = None;
+
 
 if originalFeed.isOpened():  # try to get the first frame
     rval, frame = originalFeed.read()
@@ -46,10 +48,15 @@ while rval:
 
     #Array to hold motion states of quadrants
     motion = [0,0,0,0]
+    #List to hold people detected in frame
+    people = []
 
 #Face Detection
     facesDetected = face_cascade.detectMultiScale(gray, 1.3, 5)
     for (x,y,w,h) in facesDetected:
+        # Add new person to people list if face detected
+        people.append(Person(0))
+
         cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2)
         #Top
         cv2.rectangle(frame, (x+(w/2),y), (x-(2*w), y+(2*h)), (0, 255, 0), 2) #To the left of face as displayed on  (Green)
@@ -104,6 +111,9 @@ while rval:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(horizontal, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
                 (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+
+    cv2.putText(horizontal, "Faces in frame: {}".format(len(people)), (10, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     cv2.imshow("preview", horizontal)
     cv2.imshow("grayFeed", gray);
