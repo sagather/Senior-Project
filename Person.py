@@ -2,7 +2,10 @@
 
 class Person():
     personCount = 0
+    color = [0, 0, 0]
 
-    def __init__(self, personid):
+    def __init__(self):
         Person.personCount += 1
-        self.personid = personid
+
+    def setColor(self, r, g, b):
+        self.color = [r, g, b]

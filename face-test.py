@@ -46,18 +46,32 @@ while rval:
 
     thresh = cv2.dilate(thresh, None, iterations=2)
 
-    #Array to hold motion states of quadrants
+    # Array to hold motion states of quadrants
     motion = [0,0,0,0]
-    #List to hold people detected in frame
+    # List to hold people detected in frame
     people = []
+    # i to serve as an index when going through faces
+    i = 0
 
 #Face Detection
     facesDetected = face_cascade.detectMultiScale(gray, 1.3, 5)
     for (x,y,w,h) in facesDetected:
-        # Add new person to people list if face detected
-        people.append(Person(0))
 
-        cv2.rectangle(frame, (x,y), (x+w, y+h), (255,0,0), 2)
+        # Add new person to people list if face detected
+        people.append(Person())
+        currentPerson = people[i]
+
+        # Lazy way to change color
+        if i == 0:
+            Person.setColor(people[i], 255, 0, 0) # Blue for 1st face
+        if i == 1:
+            Person.setColor(people[i], 0, 255, 255) # Yellow for 2nd face
+        if i == 2:
+            Person.setColor(people[i], 255, 255, 0) # Teal for 3rd face
+        if i == 3:
+            Person.setColor(people[i], 0, 100, 255) # Orange for 4th face
+
+        cv2.rectangle(frame, (x,y), (x+w, y+h), (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
         #Top
         cv2.rectangle(frame, (x+(w/2),y), (x-(2*w), y+(2*h)), (0, 255, 0), 2) #To the left of face as displayed on  (Green)
         cv2.rectangle(frame, (x+(w/2),y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2) #To the right of face as displayed on webcam (Red)
@@ -72,6 +86,8 @@ while rval:
         cv2.imshow("roiColor", roiColor);
 
         (_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        i += 1
 
         for c in cnts:
             if cv2.contourArea(c) < args["min_area"]:
