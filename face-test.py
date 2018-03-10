@@ -94,7 +94,9 @@ while rval:
                 continue
 
             (mx, my, mw, mh) = cv2.boundingRect(c)
-            cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
+            if (mx >= x - (2 * w) and mx <= x + (2 * w) + w) and (my >= y and my <= y + (4 * h)) and (
+                    mw <= ((x + (2 * w) + w) - (x - (2 * w))) and mh <= (y + (4 * h) - y)):
+                cv2.rectangle(frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
             #text = "Motion Detected"
 
             # Something Like this to check for specific motion?
