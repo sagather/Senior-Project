@@ -1,3 +1,4 @@
+
 # All import statements
 import cv2
 # for motion detection
@@ -11,13 +12,14 @@ import imutils
 # Might be needed later
 #   _feedWidth = originalFeed.get(3)
 #   _feedHeight = originalFeed.get(4)
+
 #Global Variables
-_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+_face_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
 _ap = argparse.ArgumentParser()
-_ap.add_argument("-a", "--min-area", type=int, default=4000, help="minimum area size")
+_ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
 _args = vars(_ap.parse_args())
 
 _firstFrame = None
@@ -42,9 +44,9 @@ def main():
     while rval:
         rval, _frame = _originalFeed.read()
 
-        _frame = imutils.resize(_frame, width = 1000)
+        _frame = imutils.resize(_frame, width = 500)
         _grayFrame = cv2.cvtColor(_frame, cv2.COLOR_BGR2GRAY)
-        _grayFrame = cv2.GaussianBlur(_grayFrame, (21,21), 0)
+        _grayFrame = cv2.GaussianBlur(_grayFrame, (21, 21), 0)
 
         if _firstFrame is None:
             _firstFrame = _grayFrame
@@ -89,20 +91,16 @@ def faceDetection():
     for (x, y, w, h) in facesDectected:
         cv2.rectangle(_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
-        topLeft = [(x+w+w/2, y), (x+(3*w)+w, y+(2*h))]
-        topRight = [(x-w/2, y), (x-(3*w), y+(2*h))]
-
-        bottomLeft = [(x+w+w/2, y+(2*h)+(h/2)), (x+(3*w)+w, y+(5*h))]
-        bottomRight = [(x-w/2, y+(2*h)+(h/2)), (x-(3*w), y+(5*h))]
-
-        #top left
-        cv2.rectangle(_frame, topLeft[0], topLeft[1], (0, 255, 0), 2)
-        #top right
-        cv2.rectangle(_frame, topRight[0], topRight[1], (0, 0, 255), 2)
-        # bottom left
-        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], (0, 255, 0), 2)
-        # bottom right
-        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], (0, 0, 255), 2)
+        # Top
+        # To the left of face as displayed on  (Green)
+        cv2.rectangle(_frame, (x+(w/2), y), (x-(2*w), y+(2*h)), (0, 255, 0), 2)
+        # To the right of face as displayed on webcam (Red)
+        cv2.rectangle(_frame, (x+(w/2), y), (x+(2*w)+w, y+(2*h)), (0, 0, 255), 2)
+        # Bottom
+        # To the left of face as displayed on webcam (Green)
+        cv2.rectangle(_frame, (x+(w/2), y+(2*h)), (x+(2*w)+w, y+(4*h)), (0, 255, 0), 2)
+        # To the right of face as displayed on webcam
+        cv2.rectangle(_frame, (x+(w/2), y+(2*h)), (x-(2*w), y+(4*h)), (0, 0, 255), 2)
 
         (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -146,7 +144,7 @@ def displayProcessing():
 
     #if not _horizontal.data:
     cv2.imshow("preview", _horizontal)
-    #cv2.imshow("grayFeed", _grayFrame);
+    cv2.imshow("grayFeed", _grayFrame);
 
 def exitProcessing():
     global _originalFeed
