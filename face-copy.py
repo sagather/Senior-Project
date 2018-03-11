@@ -100,6 +100,9 @@ while rval:
             ny = my + (mh / 4)
             nz = mx + mw - (mw / 4)
             na = my + mh - (mh / 4)
+            #midpoint of the box
+            midx = mx + (mw / 2)
+            midy = my + (my / 2)
 
             #rectangle must be in detection zones and smaller than detection area (I think)
             if (nx >= x-(2*w) and nx <= x+(2*w)+w) and (ny >= y and ny <= y+(4*h)) \
@@ -110,16 +113,16 @@ while rval:
             #text = "Motion Detected"
 
             # Something Like this to check for specific motion?
-            if (nx >= x-(2*w) and nx <= x+(w/2)) and (ny >= y and ny <= y+(2*h)):
+            if (midx >= x-(2*w) and midx <= x+(w/2)) and (midy >= y and midy <= y+(2*h)):
                 text = "                    Motion Top Right"
                 motion[1] = 1
-            elif (nx <= x+(2*w)+w) and (nx >= x+(w/2)) and (ny >= y and ny <= y+(2*h)):
+            elif (midx <= x+(2*w)+w) and (midx >= x+(w/2)) and (midy >= y and midy <= y+(2*h)):
                 text = "Motion Top Left"
                 motion[0] = 1
-            elif (nx >= x-(2*w) and nx <= x+(w/2)) and (ny >= y + (2 * h) and ny <= y + (4 * h)):
+            elif (midx >= x-(2*w) and midx <= x+(w/2)) and (midy >= y + (2 * h) and midy <= y + (4 * h)):
                 text = "                    Motion Bottom Right"
                 motion[3] = 1
-            elif (nx <= x+(2*w)+w) and (nx >= x+(w/2)) and (ny >= y+(2*h) and ny <= y+(4*h)):
+            elif (midx <= x+(2*w)+w) and (midx >= x+(w/2)) and (midy >= y+(2*h) and midy <= y+(4*h)):
                 text = "Motion Bottom Left"
                 motion[2] = 1
 
