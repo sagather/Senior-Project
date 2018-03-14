@@ -121,13 +121,13 @@ def faceDetection():
         bottomRight = [(x-w/2, y+(2*h)+(h/2)), (x-(3*w), y+(5*h))]
 
         #top left
-        cv2.rectangle(_frame, topLeft[0], topLeft[1], (0, 255, 0), 2)
+        cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
         #top right
-        cv2.rectangle(_frame, topRight[0], topRight[1], (0, 0, 255), 2)
+        cv2.rectangle(_frame, topRight[0], topRight[1], currentPerson.color, 2)
         # bottom left
-        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], (0, 255, 0), 2)
+        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
         # bottom right
-        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], (0, 0, 255), 2)
+        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
 
         (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -193,6 +193,31 @@ def exitProcessing():
     global _originalFeed
     _originalFeed.release()
     cv2.destroyAllWindows()
+
+def math():
+    global _frameText
+    global _motionStateArray
+    #motion array needs to be revertedto zero if no motion is detected in the bounding boxes
+    #check forward
+    if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
+        _frameText = "Forward"
+    #check reverse
+    elif _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
+        _frameText = "Reverse"
+    #check forward left
+    elif _motionStateArray[0] == 1:
+        _frameText = "Forward Left"
+    #check forward right
+    elif _motionStateArray[1] == 1:
+        _frameText = "Forward Right"
+    #check reverse left
+    elif _motionStateArray[2] == 1:
+        _frameText = "Reverse Left"
+    #check reverse right
+    elif _motionStateArray[3] == 1:
+        _frameText = "Reverse Right"
+    else:
+        _frameText = "Stop"
 
 
 main()
