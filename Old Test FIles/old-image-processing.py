@@ -14,7 +14,7 @@ import imutils
 #   _feedHeight = originalFeed.get(4)
 
 # Load in cascade files
-_face_cascade = cv2.CascadeClassifier('HaarCascades/haarcascade_frontalface_default.xml')
+_face_cascade = cv2.CascadeClassifier('/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -50,9 +50,12 @@ def updateTimestampTextOnFrame():
 
 
 def faceDetect():
+    global _face_cascade
     global _firstFrame
     global _frameText
+
     facesDetected = _face_cascade.detectMultiScale(_grayFrame, 1.3, 5)
+
     for (x, y, w, h) in facesDetected:
         cv2.rectangle(_firstFrame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 

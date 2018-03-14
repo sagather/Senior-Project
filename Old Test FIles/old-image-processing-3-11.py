@@ -4,7 +4,6 @@ import cv2
 import argparse
 import datetime
 import imutils
-from Person import Person
 
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
@@ -28,8 +27,6 @@ _thresh = None
 _frameText = ""
 _horizontal = None
 _motionStateArray = [0, 0, 0, 0]
-_people = []
-_i = 0
 
 def main():
     #global declarations
@@ -58,10 +55,6 @@ def main():
         _thresh = cv2.dilate(_thresh, None, iterations=2)
 
         _motionStateArray = [0, 0, 0, 0]
-        # List to hold people detected in frame
-        _people = []
-        # i to serve as an index when going through faces
-        _i = 0
         faceDetection()
         displayProcessing()
 
@@ -89,30 +82,12 @@ def faceDetection():
     global _frameText
     global _motionStateArray
     global _horizontal
-    global _people
-    global _i
-    global _
 
     #Content Start
     facesDectected = _face_cascade.detectMultiScale(_grayFrame, 1.3, 5)
 
     for (x, y, w, h) in facesDectected:
-        # Add new person to people list if face detected
-        _people.append(Person())
-        currentPerson = _people[_i]
-
-        # Lazy way to change color
-        if _i == 0:
-            Person.setColor(_people[_i], 255, 0, 0)  # Blue for 1st face
-        if _i == 1:
-            Person.setColor(_people[_i], 0, 255, 255)  # Yellow for 2nd face
-        if _i == 2:
-            Person.setColor(_people[_i], 255, 255, 0)  # Teal for 3rd face
-        if _i == 3:
-            Person.setColor(_people[_i], 0, 100, 255)  # Orange for 4th face
-
-        cv2.rectangle(_frame, (x, y), (x + w, y + h),
-                      (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
+        cv2.rectangle(_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
         topLeft = [(x+w+w/2, y), (x+(3*w)+w, y+(2*h))]
         topRight = [(x-w/2, y), (x-(3*w), y+(2*h))]
@@ -121,50 +96,34 @@ def faceDetection():
         bottomRight = [(x-w/2, y+(2*h)+(h/2)), (x-(3*w), y+(5*h))]
 
         #top left
-        cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, topLeft[0], topLeft[1], (0, 255, 0), 2)
         #top right
-        cv2.rectangle(_frame, topRight[0], topRight[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, topRight[0], topRight[1], (0, 0, 255), 2)
         # bottom left
-        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], (0, 255, 0), 2)
         # bottom right
-        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], (0, 0, 255), 2)
 
         (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        _i += 1
 
         for c in cnts:
             if cv2.contourArea(c) < _args["min_area"]:
                 continue
 
             (mx, my, mw, mh) = cv2.boundingRect(c)
-
-            # coordinates for the smaller boxes
-            nx = mx + (mw / 4)
-            ny = my + (mh / 4)
-            nz = mx + mw - (mw / 4)
-            na = my + mh - (mh / 4)
-            # midpoint of the box
-            midx = mx + (mw / 2)
-            midy = my + (my / 2)
-
-            # rectangle must be in detection zones and smaller than detection area (I think)
-            if (nx >= x - (2 * w) and nx <= x + (2 * w) + w) and (ny >= y and ny <= y + (4 * h)) \
-                    and (nz >= x - (2 * w) and nz <= x + (2 * w) + w) and (na >= y and na <= y + (4 * h)) \
-                    and (mw <= ((x + (2 * w) + w) - (x - (2 * w))) and mh <= (y + (4 * h) - y)):
-                cv2.rectangle(_frame, (nx, ny), (nz, na), (244, 66, 232), 2)
+            cv2.rectangle(_frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
 
             # Something Like this to check for specific motion?
-            if (midx >= x - (2 * w) and midx <= x + (w / 2)) and (midy >= y and midy <= y + (2 * h)):
+            if (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y and my <= y+(2*h)):
                 _frameText = "                    Motion Top Right"
                 _motionStateArray[1] = 1
-            elif (midx <= x + (2 * w) + w) and (midx >= x + (w / 2)) and (midy >= y and midy <= y + (2 * h)):
+            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y and my <= y+(2*h)):
                 _frameText = "Motion Top Left"
                 _motionStateArray[0] = 1
-            elif (midx >= x - (2 * w) and midx <= x + (w / 2)) and (midy >= y + (2 * h) and midy <= y + (4 * h)):
+            elif (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y + (2 * h) and my <= y + (4 * h)):
                 _frameText = "                    Motion Bottom Right"
                 _motionStateArray[3] = 1
-            elif (midx <= x + (2 * w) + w) and (midx >= x + (w / 2)) and (midy >= y + (2 * h) and midy <= y + (4 * h)):
+            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y+(2*h) and my <= y+(4*h)):
                 _frameText = "Motion Bottom Left"
                 _motionStateArray[2] = 1
 
@@ -193,31 +152,6 @@ def exitProcessing():
     global _originalFeed
     _originalFeed.release()
     cv2.destroyAllWindows()
-
-def math():
-    global _frameText
-    global _motionStateArray
-    #motion array needs to be revertedto zero if no motion is detected in the bounding boxes
-    #check forward
-    if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
-        _frameText = "Forward"
-    #check reverse
-    elif _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
-        _frameText = "Reverse"
-    #check forward left
-    elif _motionStateArray[0] == 1:
-        _frameText = "Forward Left"
-    #check forward right
-    elif _motionStateArray[1] == 1:
-        _frameText = "Forward Right"
-    #check reverse left
-    elif _motionStateArray[2] == 1:
-        _frameText = "Reverse Left"
-    #check reverse right
-    elif _motionStateArray[3] == 1:
-        _frameText = "Reverse Right"
-    else:
-        _frameText = "Stop"
 
 
 main()
