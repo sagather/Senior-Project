@@ -13,6 +13,7 @@ from Person import Person
 #   _feedWidth = originalFeed.get(3)
 #   _feedHeight = originalFeed.get(4)
 #Global Variables
+
 # _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
 # for James
