@@ -18,7 +18,7 @@ from Person import Person
 
 # for James
 _face_cascade = cv2.CascadeClassifier(
-    '/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+    '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
