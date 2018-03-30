@@ -14,11 +14,15 @@ from Person import Person
 #   _feedHeight = originalFeed.get(4)
 #Global Variables
 
-# _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+
+# for Sam
+#_face_cascade = cv2.CascadeClassifier(
+    #'/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 # for James
-_face_cascade = cv2.CascadeClassifier(
-    '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+#_face_cascade = cv2.CascadeClassifier(
+    #'/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -150,32 +154,31 @@ def faceDetection():
             smally = my + (mh / 4)
             smallw = mx + mw - (mw / 4)
             smallh = my + mh - (mh / 4)
-            # midpoint of the box
-            midx = mx + (mw / 2)
-            midy = my + (my / 2)
+
+            # midpoint of the box (not actually right now, im gonna fix it)
+            midx = smallx
+            midy = smally
 
             # rectangle must be in detection zones and smaller than detection area (I think)
 
-            cv2.rectangle(_frame, (smallx, smally), (smallw, smallh), (244, 66, 232), 2)
-
-            # Something Like this to check for specific motion?
-            if (midx >= x - (2 * w) and midx <= x + (w / 2)) and (midy >= y and midy <= y + (2 * h)):
-                _frameText = "                    Motion Top Right"
-                _motionStateArray[1] = 1
-            elif (midx <= x + (2 * w) + w) and (midx >= x + (w / 2)) and (midy >= y and midy <= y + (2 * h)):
-                _frameText = "Motion Top Left"
-                _motionStateArray[0] = 1
-            elif (midx >= x - (2 * w) and midx <= x + (w / 2)) and (midy >= y + (2 * h) and midy <= y + (4 * h)):
-                _frameText = "                    Motion Bottom Right"
-                _motionStateArray[3] = 1
-            elif (midx <= x + (2 * w) + w) and (midx >= x + (w / 2)) and (midy >= y + (2 * h) and midy <= y + (4 * h)):
-                _frameText = "Motion Bottom Left"
-                _motionStateArray[2] = 1
-
-            if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
-                _frameText = "    Motion BOTH Top"
-            if _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
-                _frameText = "    Motion BOTH Bottom"
+            if(inBounds(smallx, smally, x, y, w, h)):
+                cv2.rectangle(_frame, (smallx, smally), (smallw, smallh), (244, 66, 232), 2)
+                if (topRightBound(smallx, smally, x, y, w, h)):
+                    _frameText = "                    Motion Top Right"
+                    _motionStateArray[1] = 1
+                elif (topLeftBound(smallx, smally, x, y, w, h)):
+                    _frameText = "Motion Top Left"
+                    _motionStateArray[0] = 1
+                elif (bottomRightBound(smallx, smally, x, y, w, h)):
+                    _frameText = "                    Motion Bottom Right"
+                    _motionStateArray[3] = 1
+                elif (bottomLeftBound(smallx, smally, x, y, w, h)):
+                    _frameText = "Motion Bottom Left"
+                    _motionStateArray[2] = 1
+                if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
+                    _frameText = "    Motion BOTH Top"
+                if _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
+                    _frameText = "    Motion BOTH Bottom"
 
 def displayProcessing():
     global _horizontal
@@ -201,7 +204,7 @@ def exitProcessing():
 def math():
     global _frameText
     global _motionStateArray
-    #motion array needs to be revertedto zero if no motion is detected in the bounding boxes
+    #motion array needs to be reverted to zero if no motion is detected in the bounding boxes
     #check forward
     if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
         _frameText = "Forward"
@@ -223,6 +226,44 @@ def math():
     else:
         _frameText = "Stop"
 
+def inBounds(smallx, smally, x, y, w, h):
+    if topLeftBound(smallx, smally, x, y, w, h):
+        return True
+    elif topRightBound(smallx, smally, x, y, w, h):
+        return True
+    elif bottomLeftBound(smallx, smally, x, y, w, h):
+        return True
+    elif bottomRightBound(smallx, smally, x, y, w, h):
+        return True
+    else:
+        return False
 
+def topLeftBound(smallx, smally, x, y, w, h):
+    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
+        if (smally > y and smally < y+(2*h)):
+            return True
+    else:
+        return False
+
+def topRightBound(smallx, smally, x, y, w, h):
+    if smallx > x-w/2 and smallx < x-(3*w):
+        if (smally > y and smally < y+(2*h)):
+            return True
+    else:
+        return False
+
+def bottomLeftBound(smallx, smally, x, y, w, h):
+    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
+        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
+            return True
+    else:
+        return False
+
+def bottomRightBound(smallx, smally, x, y, w, h):
+    if smallx > x-w/2 and smallx < x-(3*w):
+        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
+            return True
+    else:
+        return False
 main()
 exitProcessing()
