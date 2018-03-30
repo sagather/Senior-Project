@@ -1,3 +1,5 @@
+#   This runs from the laptop
+
 import bluetooth
 
 #TODO Change the MAC address to your raspberry pi's mac address
