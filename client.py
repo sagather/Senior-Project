@@ -1,19 +1,14 @@
-#BEFORE YOU EXECUTE THIS SCRIPT, ON THE R.PI, EXECUTE THE FOLLOWING COMMANDS:
-#
-#   bluetoothctl
-#   pairable on
-#   discoverable on
-#
-#   And then use ctrl+c to escape out, and the pi will be discoverable.  Run the bluetooth tester first, just to verify
-
 import bluetooth
+
+#TODO Change the MAC address to your raspberry pi's mac address
+#TODO easiest way to find that is to run the bluetooth-tester program on your raspberry pi
 
 serverMACAddress = "B8:27:EB:9E:2A:D6"
 port = 3
 s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 s.connect((serverMACAddress, port))
 while 1:
-    text = raw_input()  # Note change to the old (Python 2) raw_input
+    text = raw_input()
     if text == "quit":
         break
     else:
