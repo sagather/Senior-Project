@@ -2,7 +2,7 @@
 
 import bluetooth
 
-target_name = "Torvith"
+target_name = "raspberrypi"
 target_address = None
 
 nearby_devices = bluetooth.discover_devices()
