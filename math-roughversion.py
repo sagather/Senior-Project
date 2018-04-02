@@ -4,6 +4,7 @@ import cv2
 import argparse
 import datetime
 import imutils
+from Person import Person
 
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
@@ -12,7 +13,16 @@ import imutils
 #   _feedWidth = originalFeed.get(3)
 #   _feedHeight = originalFeed.get(4)
 #Global Variables
+
 _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+
+# for Sam
+#_face_cascade = cv2.CascadeClassifier(
+    #'/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+
+# for James
+#_face_cascade = cv2.CascadeClassifier(
+    #'/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -26,15 +36,15 @@ _frame = None
 _thresh = None
 _frameText = ""
 _horizontal = None
-_motionStateArray = [0, 0, 0, 0]
+_people = []
 
 def main():
     #global declarations
     global _firstFrame
     global _grayFrame
     global _frame
-    global _motionStateArray
     global _thresh
+    global _people
 
     #Content start
     rval = firstFrame()
@@ -54,10 +64,12 @@ def main():
         _thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
         _thresh = cv2.dilate(_thresh, None, iterations=2)
 
-        _motionStateArray = [0, 0, 0, 0]
+        # List to hold people detected in frame
+        _people = []
+        # i to serve as an index when going through faces
         faceDetection()
+        math()
         displayProcessing()
-
         key = cv2.waitKey(20)
         if key == 27:  # exit on ESC
             break
@@ -69,7 +81,7 @@ def firstFrame():
     global _originalFeed
     if _originalFeed.isOpened():  # try to get the first frame
         rvalLocal, _frame = _originalFeed.read()
-        _frameText = "No Motion"
+        _frameText = "Stop"
         return rvalLocal
 
 def faceDetection():
@@ -80,14 +92,29 @@ def faceDetection():
     global _face_cascade
     global _thresh
     global _frameText
-    global _motionStateArray
     global _horizontal
+    global _people
 
     #Content Start
+    _i = 0
     facesDectected = _face_cascade.detectMultiScale(_grayFrame, 1.3, 5)
-
     for (x, y, w, h) in facesDectected:
-        cv2.rectangle(_frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        # Add new person to people list if face detected
+        _people.append(Person())
+        currentPerson = _people[_i]
+
+        # Lazy way to change color
+        if _i == 0:
+            Person.setColor(_people[_i], 255, 0, 0)  # Blue for 1st face
+        if _i == 1:
+            Person.setColor(_people[_i], 0, 255, 255)  # Yellow for 2nd face
+        if _i == 2:
+            Person.setColor(_people[_i], 255, 255, 0)  # Teal for 3rd face
+        if _i == 3:
+            Person.setColor(_people[_i], 0, 100, 255)  # Orange for 4th face
+
+        cv2.rectangle(_frame, (x, y), (x + w, y + h),
+                      (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
 
         topLeft = [(x+w+w/2, y), (x+(3*w)+w, y+(2*h))]
         topRight = [(x-w/2, y), (x-(3*w), y+(2*h))]
@@ -96,13 +123,13 @@ def faceDetection():
         bottomRight = [(x-w/2, y+(2*h)+(h/2)), (x-(3*w), y+(5*h))]
 
         #top left
-        cv2.rectangle(_frame, topLeft[0], topLeft[1], (0, 255, 0), 2)
+        cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
         #top right
-        cv2.rectangle(_frame, topRight[0], topRight[1], (0, 0, 255), 2)
+        cv2.rectangle(_frame, topRight[0], topRight[1], currentPerson.color, 2)
         # bottom left
-        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], (0, 255, 0), 2)
+        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
         # bottom right
-        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], (0, 0, 255), 2)
+        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
 
         (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -111,38 +138,51 @@ def faceDetection():
                 continue
 
             (mx, my, mw, mh) = cv2.boundingRect(c)
-            cv2.rectangle(_frame, (mx, my), (mx + mw, my + mh), (244, 66, 232), 2)
 
-            # Something Like this to check for specific motion?
-            if (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y and my <= y+(2*h)):
-                _frameText = "                    Motion Top Right"
-                _motionStateArray[1] = 1
-            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y and my <= y+(2*h)):
-                _frameText = "Motion Top Left"
-                _motionStateArray[0] = 1
-            elif (mx >= x-(2*w) and mx <= x+(w/2)) and (my >= y + (2 * h) and my <= y + (4 * h)):
-                _frameText = "                    Motion Bottom Right"
-                _motionStateArray[3] = 1
-            elif (mx <= x+(2*w)+w) and (mx >= x+(w/2)) and (my >= y+(2*h) and my <= y+(4*h)):
-                _frameText = "Motion Bottom Left"
-                _motionStateArray[2] = 1
+            # coordinates for the smaller boxes
+            smallx = mx + (mw / 4)
+            smally = my + (mh / 4)
+            smallw = mx + mw - (mw / 4)
+            smallh = my + mh - (mh / 4)
 
-            if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
-                _frameText = "    Motion BOTH Top"
-            if _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
-                _frameText = "    Motion BOTH Bottom"
+            # midpoint of the box (not actually right now, im gonna fix it)
+            midx = smallx
+            midy = smally
+
+            # rectangle must be in detection zones and smaller than detection area (I think)
+
+            if(inBounds(smallx, smally, x, y, w, h)):
+                cv2.rectangle(_frame, (smallx, smally), (smallw, smallh), (244, 66, 232), 2)
+                if (topRightBound(smallx, smally, x, y, w, h)) and (topLeftBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 4, 1)
+                elif (bottomRightBound(smallx, smally, x, y, w, h)) and (bottomLeftBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 5, 1)
+                elif (topRightBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 1, 1)
+                elif (topLeftBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 0, 1)
+                elif (bottomRightBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 3, 1)
+                elif (bottomLeftBound(smallx, smally, x, y, w, h)):
+                    Person.setMotion(_people[_i], 2, 1)
+        _i += 1
+
+            #Math Calculations
 
 def displayProcessing():
     global _horizontal
     global _frame
     global _grayFrame
     global _frameText
+    global _people
 
     _horizontal = cv2.flip(_frame, 1)
     cv2.putText(_horizontal, "Frame Status: {}".format(_frameText), (10, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(_horizontal, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
                 (10, _frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+    cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     #if not _horizontal.data:
     cv2.imshow("preview", _horizontal)
@@ -155,28 +195,98 @@ def exitProcessing():
 
 def math():
     global _frameText
-    global _motionStateArray
-    #motion array needs to be revertedto zero if no motion is detected in the bounding boxes
-    #check forward
-    if _motionStateArray[0] == 1 and _motionStateArray[1] == 1:
+    masterMotionStateArray = [0, 0, 0, 0]
+    global _people
+
+    numPeople = len(_people)
+    divideby = 0
+
+    if numPeople == 4:
+        divideby = 3
+    elif numPeople == 3:
+        divideby = 2
+    else:
+        divideby = numPeople
+
+
+    for peeps in _people:
+        #motion array needs to be reverted to zero if no motion is detected in the bounding boxes
+
+        if peeps.motion[4] == 1:
+            masterMotionStateArray[0] = masterMotionStateArray[0] + 1
+            masterMotionStateArray[1] = masterMotionStateArray[1] + 1
+        elif peeps.motion[5] == 1:
+            masterMotionStateArray[2] = masterMotionStateArray[2] + 1
+            masterMotionStateArray[3] = masterMotionStateArray[3] + 1
+        elif peeps.motion[0] == 1:
+            masterMotionStateArray[0] = masterMotionStateArray[0] + 1
+        elif peeps.motion[1] == 1:
+            masterMotionStateArray[1] = masterMotionStateArray[1] + 1
+        elif peeps.motion[2] == 1:
+            masterMotionStateArray[2] = masterMotionStateArray[2] + 1
+        elif peeps.motion[3] == 1:
+            masterMotionStateArray[3] = masterMotionStateArray[3] + 1
+
+    # check forward
+    if masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
         _frameText = "Forward"
     #check reverse
-    elif _motionStateArray[2] == 1 and _motionStateArray[3] == 1:
+    elif masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
         _frameText = "Reverse"
     #check forward left
-    elif _motionStateArray[0] == 1:
+    elif masterMotionStateArray[0] >= divideby:
         _frameText = "Forward Left"
     #check forward right
-    elif _motionStateArray[1] == 1:
+    elif masterMotionStateArray[1] >= divideby:
         _frameText = "Forward Right"
     #check reverse left
-    elif _motionStateArray[2] == 1:
+    elif masterMotionStateArray[2] >= divideby:
         _frameText = "Reverse Left"
     #check reverse right
-    elif _motionStateArray[3] == 1:
-        _frameText = "Reverse Right"
+    elif masterMotionStateArray[3] >= divideby:
+         _frameText = "Reverse Right"
     else:
         _frameText = "Stop"
+
+def inBounds(smallx, smally, x, y, w, h):
+    if topLeftBound(smallx, smally, x, y, w, h):
+        return True
+    elif topRightBound(smallx, smally, x, y, w, h):
+        return True
+    elif bottomLeftBound(smallx, smally, x, y, w, h):
+        return True
+    elif bottomRightBound(smallx, smally, x, y, w, h):
+        return True
+    else:
+        return False
+
+def topLeftBound(smallx, smally, x, y, w, h):
+    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
+        if (smally > y and smally < y+(2*h)):
+            return True
+    else:
+        return False
+
+def topRightBound(smallx, smally, x, y, w, h):
+    if smallx > x-w/2 and smallx < x-(3*w):
+        if (smally > y and smally < y+(2*h)):
+            return True
+    else:
+        return False
+
+def bottomLeftBound(smallx, smally, x, y, w, h):
+    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
+        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
+            return True
+    else:
+        return False
+
+def bottomRightBound(smallx, smally, x, y, w, h):
+    if smallx > x-w/2 and smallx < x-(3*w):
+        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
+            return True
+    else:
+        return False
 
 main()
 exitProcessing()
