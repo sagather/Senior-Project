@@ -65,11 +65,17 @@ def main():
         _thresh = cv2.dilate(_thresh, None, iterations=2)
 
         # List to hold people detected in frame
-        _people = []
+
         # i to serve as an index when going through faces
         faceDetection()
         math()
         displayProcessing()
+
+        for peeps in _people:
+            peeps.clearMotion()
+
+        del _people[:]
+
         key = cv2.waitKey(20)
         if key == 27:  # exit on ESC
             break
@@ -153,11 +159,7 @@ def faceDetection():
 
             if(inBounds(smallx, smally, x, y, w, h)):
                 cv2.rectangle(_frame, (smallx, smally), (smallw, smallh), (244, 66, 232), 2)
-                if (topRightBound(smallx, smally, x, y, w, h)) and (topLeftBound(smallx, smally, x, y, w, h)):
-                    Person.setMotion(_people[_i], 4, 1)
-                elif (bottomRightBound(smallx, smally, x, y, w, h)) and (bottomLeftBound(smallx, smally, x, y, w, h)):
-                    Person.setMotion(_people[_i], 5, 1)
-                elif (topRightBound(smallx, smally, x, y, w, h)):
+                if (topRightBound(smallx, smally, x, y, w, h)):
                     Person.setMotion(_people[_i], 1, 1)
                 elif (topLeftBound(smallx, smally, x, y, w, h)):
                     Person.setMotion(_people[_i], 0, 1)
@@ -166,8 +168,6 @@ def faceDetection():
                 elif (bottomLeftBound(smallx, smally, x, y, w, h)):
                     Person.setMotion(_people[_i], 2, 1)
         _i += 1
-
-            #Math Calculations
 
 def displayProcessing():
     global _horizontal
@@ -195,8 +195,8 @@ def exitProcessing():
 
 def math():
     global _frameText
-    masterMotionStateArray = [0, 0, 0, 0]
     global _people
+    masterMotionStateArray = [0, 0, 0, 0]
 
     numPeople = len(_people)
     divideby = 0
@@ -205,17 +205,19 @@ def math():
         divideby = 3
     elif numPeople == 3:
         divideby = 2
+    elif numPeople == 0:
+        divideby = 100
     else:
         divideby = numPeople
 
 
     for peeps in _people:
+        print(peeps.motion)
         #motion array needs to be reverted to zero if no motion is detected in the bounding boxes
-
-        if peeps.motion[4] == 1:
+        if peeps.motion[0] == 1 and peeps.motion[1] == 1:
             masterMotionStateArray[0] = masterMotionStateArray[0] + 1
             masterMotionStateArray[1] = masterMotionStateArray[1] + 1
-        elif peeps.motion[5] == 1:
+        elif peeps.motion[2] == 1 and peeps.motion[3] == 1:
             masterMotionStateArray[2] = masterMotionStateArray[2] + 1
             masterMotionStateArray[3] = masterMotionStateArray[3] + 1
         elif peeps.motion[0] == 1:
@@ -229,24 +231,25 @@ def math():
 
     # check forward
     if masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
-        _frameText = "Forward"
+        _frameText = "forward"
     #check reverse
     elif masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
-        _frameText = "Reverse"
+        _frameText = "reverse"
     #check forward left
     elif masterMotionStateArray[0] >= divideby:
-        _frameText = "Forward Left"
+        _frameText = "forward left"
     #check forward right
     elif masterMotionStateArray[1] >= divideby:
-        _frameText = "Forward Right"
+        _frameText = "forward right"
     #check reverse left
     elif masterMotionStateArray[2] >= divideby:
-        _frameText = "Reverse Left"
+        _frameText = "reverse left"
     #check reverse right
     elif masterMotionStateArray[3] >= divideby:
-         _frameText = "Reverse Right"
+         _frameText = "reverse right"
     else:
-        _frameText = "Stop"
+        _frameText = "stop"
+
 
 def inBounds(smallx, smally, x, y, w, h):
     if topLeftBound(smallx, smally, x, y, w, h):
@@ -268,7 +271,7 @@ def topLeftBound(smallx, smally, x, y, w, h):
         return False
 
 def topRightBound(smallx, smally, x, y, w, h):
-    if smallx > x-w/2 and smallx < x-(3*w):
+    if smallx < x-w/2 and smallx > x-(3*w):
         if (smally > y and smally < y+(2*h)):
             return True
     else:
@@ -282,7 +285,7 @@ def bottomLeftBound(smallx, smally, x, y, w, h):
         return False
 
 def bottomRightBound(smallx, smally, x, y, w, h):
-    if smallx > x-w/2 and smallx < x-(3*w):
+    if smallx < x-w/2 and smallx > x-(3*w):
         if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
             return True
     else:
