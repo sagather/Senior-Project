@@ -91,7 +91,7 @@ def firstFrame():
     global _originalFeed
     if _originalFeed.isOpened():  # try to get the first frame
         rvalLocal, _frame = _originalFeed.read()
-        _frameText = "Stop"
+        _frameText = "stop"
         _client.send("stop")
         return rvalLocal
 
@@ -249,16 +249,16 @@ def math():
         _frameText = "reverse"
     #check forward left
     elif masterMotionStateArray[0] >= divideby:
-        _frameText = "forward left"
+        _frameText = "left"
     #check forward right
     elif masterMotionStateArray[1] >= divideby:
-        _frameText = "forward right"
+        _frameText = "right"
     #check reverse left
     elif masterMotionStateArray[2] >= divideby:
-        _frameText = "reverse left"
+        _frameText = "reverse"
     #check reverse right
     elif masterMotionStateArray[3] >= divideby:
-         _frameText = "reverse right"
+         _frameText = "reverse"
     else:
         _frameText = "stop"
 
