@@ -18,12 +18,7 @@ class Client():
         s.connect((serverMACAddress, port))
 
     def send(self, text):
-        while 1:
-            text = raw_input()
-            if text == "quit":
-                break
-            else:
-                s.send(text)
+            s.send(text)
 
     def quit(self):
         s.close()
