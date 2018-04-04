@@ -5,6 +5,7 @@ import argparse
 import datetime
 import imutils
 from Person import Person
+import Client
 
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
@@ -37,6 +38,7 @@ _thresh = None
 _frameText = ""
 _horizontal = None
 _people = []
+_client = None
 
 def main():
     #global declarations
@@ -45,9 +47,11 @@ def main():
     global _frame
     global _thresh
     global _people
+    global _client
 
     #Content start
     rval = firstFrame()
+    _client = Client()
 
     while rval:
         rval, _frame = _originalFeed.read()
@@ -88,6 +92,7 @@ def firstFrame():
     if _originalFeed.isOpened():  # try to get the first frame
         rvalLocal, _frame = _originalFeed.read()
         _frameText = "Stop"
+        _client.send("stop")
         return rvalLocal
 
 def faceDetection():
@@ -188,6 +193,8 @@ def displayProcessing():
                 (10, _frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
     cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+    _client.send(_frameText)
 
     #if not _horizontal.data:
     cv2.imshow("preview", _horizontal)

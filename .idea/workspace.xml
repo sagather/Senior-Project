@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bc2e01ef-d3a1-4a0f-923f-7cef6c3487e7" name="Default" comment="organized bluetooth stuff">
+    <list default="true" id="bc2e01ef-d3a1-4a0f-923f-7cef6c3487e7" name="Default" comment="reorganized client script">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Bluetooth Scripts/client.py" afterPath="$PROJECT_DIR$/Bluetooth Scripts/client.py" />
+      <change beforePath="$PROJECT_DIR$/Bluetooth Scripts/client.py" afterPath="$PROJECT_DIR$/Client.py" />
+      <change beforePath="$PROJECT_DIR$/math-roughversion.py" afterPath="$PROJECT_DIR$/math-roughversion.py" />
     </list>
     <ignored path="C:\Users\bcxtr\PycharmProjects\Senior-Project\.idea\shelf/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,22 +38,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/client.py">
+      <file leaf-file-name="Client.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="567">
-              <caret line="27" column="8" lean-forward="false" selection-start-line="27" selection-start-column="8" selection-end-line="27" selection-end-column="8" />
+            <state relative-caret-position="189">
+              <caret line="9" column="12" lean-forward="false" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="math-roughversion.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="math-roughversion.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/math-roughversion.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="763">
-              <caret line="173" column="17" lean-forward="true" selection-start-line="173" selection-start-column="17" selection-end-line="173" selection-end-column="17" />
-              <folding />
+            <state relative-caret-position="448">
+              <caret line="53" column="22" lean-forward="true" selection-start-line="53" selection-start-column="22" selection-end-line="53" selection-end-column="22" />
+              <folding>
+                <element signature="e#24#34#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -102,6 +105,7 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="UPDATE_CHANGES_POLICY" value="SHELVE" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GithubProjectSettings">
@@ -125,7 +129,6 @@
         <option value="$PROJECT_DIR$/Person.py" />
         <option value="$PROJECT_DIR$/Old/tester.py" />
         <option value="$PROJECT_DIR$/image-processing-tester.py" />
-        <option value="$PROJECT_DIR$/math-roughversion.py" />
         <option value="$PROJECT_DIR$/image-processing-3-11.py" />
         <option value="$PROJECT_DIR$/numpy test.py" />
         <option value="$PROJECT_DIR$/image-processing.py" />
@@ -135,6 +138,7 @@
         <option value="$PROJECT_DIR$/client.py" />
         <option value="$PROJECT_DIR$/Bluetooth Scripts/bluetoothStartup.py" />
         <option value="$PROJECT_DIR$/Bluetooth Scripts/client.py" />
+        <option value="$PROJECT_DIR$/math-roughversion.py" />
       </list>
     </option>
   </component>
@@ -186,14 +190,15 @@
     <property name="SearchEverywhereHistoryKey" value="pyblu&#9;FILE&#9;file://C:/Users/bcxtr/PycharmProjects/Senior-Project/venv1/Lib/site-packages/PyBluez-0.22-py2.7.egg-info" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\bcxtr\PycharmProjects\Senior-Project\Bluetooth Scripts" />
-      <recent name="C:\Users\Megan Ostby\Desktop\Senior Project\Project\Senior-Project\Old Test FIles" />
-      <recent name="C:\Users\Megan Ostby\Desktop\Senior Project\Project\Senior-Project\Old" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\bcxtr\PycharmProjects\Senior-Project" />
       <recent name="C:\Users\Megan Ostby\Desktop\Senior Project\Project\Senior-Project" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\bcxtr\PycharmProjects\Senior-Project" />
+      <recent name="C:\Users\bcxtr\PycharmProjects\Senior-Project\Bluetooth Scripts" />
+      <recent name="C:\Users\Megan Ostby\Desktop\Senior Project\Project\Senior-Project\Old Test FIles" />
+      <recent name="C:\Users\Megan Ostby\Desktop\Senior Project\Project\Senior-Project\Old" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -239,7 +244,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Senior-Project" />
-      <option name="SCRIPT_NAME" value="C:\Users\bcxtr\PycharmProjects\Senior-Project\Bluetooth Scripts\client.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\bcxtr\PycharmProjects\Senior-Project\Client.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -486,7 +491,14 @@
       <option name="project" value="LOCAL" />
       <updated>1522438250394</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="reorganized client script">
+      <created>1522817271912</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1522817271912</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -538,7 +550,8 @@
     <MESSAGE value="Included server script, and instructions on how to make it work" />
     <MESSAGE value="Added comments" />
     <MESSAGE value="created bluetooth startup file" />
-    <option name="LAST_COMMIT_MESSAGE" value="created bluetooth startup file" />
+    <MESSAGE value="reorganized client script" />
+    <option name="LAST_COMMIT_MESSAGE" value="reorganized client script" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -693,14 +706,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/bluetooth-tester.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="4" column="26" lean-forward="false" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/image-processing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
@@ -708,22 +713,6 @@
           <folding>
             <element signature="e#24#34#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/math-roughversion.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="763">
-          <caret line="173" column="17" lean-forward="true" selection-start-line="173" selection-start-column="17" selection-end-line="173" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/bluetoothStartup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="10" column="107" lean-forward="false" selection-start-line="10" selection-start-column="107" selection-end-line="10" selection-end-column="107" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -743,11 +732,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/client.py">
+    <entry file="file://$PROJECT_DIR$/Client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="27" column="8" lean-forward="false" selection-start-line="27" selection-start-column="8" selection-end-line="27" selection-end-column="8" />
+        <state relative-caret-position="189">
+          <caret line="9" column="12" lean-forward="false" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/bluetooth-tester.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="26" lean-forward="false" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Bluetooth Scripts/bluetoothStartup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="10" column="107" lean-forward="false" selection-start-line="10" selection-start-column="107" selection-end-line="10" selection-end-column="107" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/math-roughversion.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="448">
+          <caret line="53" column="22" lean-forward="true" selection-start-line="53" selection-start-column="22" selection-end-line="53" selection-end-column="22" />
+          <folding>
+            <element signature="e#24#34#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
