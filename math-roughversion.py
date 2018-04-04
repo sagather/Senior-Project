@@ -13,17 +13,17 @@ import Client
 # Might be needed later
 #   _feedWidth = originalFeed.get(3)
 #   _feedHeight = originalFeed.get(4)
-#Global Variables
+# Global Variables
 
 _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
 # for Sam
-#_face_cascade = cv2.CascadeClassifier(
-    #'/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+# _face_cascade = cv2.CascadeClassifier(
+# '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 # for James
-#_face_cascade = cv2.CascadeClassifier(
-    #'/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+# _face_cascade = cv2.CascadeClassifier(
+# '/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -40,8 +40,9 @@ _horizontal = None
 _people = []
 _client = None
 
+
 def main():
-    #global declarations
+    # global declarations
     global _firstFrame
     global _grayFrame
     global _frame
@@ -49,16 +50,16 @@ def main():
     global _people
     global _client
 
-    #Content start
+    # Content start
     rval = firstFrame()
-    _client = Client()
+    _client = Client
 
     while rval:
         rval, _frame = _originalFeed.read()
 
-        _frame = imutils.resize(_frame, width = 1000)
+        _frame = imutils.resize(_frame, width=1000)
         _grayFrame = cv2.cvtColor(_frame, cv2.COLOR_BGR2GRAY)
-        _grayFrame = cv2.GaussianBlur(_grayFrame, (21,21), 0)
+        _grayFrame = cv2.GaussianBlur(_grayFrame, (21, 21), 0)
 
         if _firstFrame is None:
             _firstFrame = _grayFrame
@@ -95,8 +96,9 @@ def firstFrame():
         _client.send("stop")
         return rvalLocal
 
+
 def faceDetection():
-    #global declarations
+    # global declarations
     global _firstFrame
     global _frameText
     global _frame
@@ -106,7 +108,7 @@ def faceDetection():
     global _horizontal
     global _people
 
-    #Content Start
+    # Content Start
     _i = 0
     facesDectected = _face_cascade.detectMultiScale(_grayFrame, 1.3, 5)
     for (x, y, w, h) in facesDectected:
@@ -127,15 +129,15 @@ def faceDetection():
         cv2.rectangle(_frame, (x, y), (x + w, y + h),
                       (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
 
-        topLeft = [(x+w+w/2, y), (x+(3*w)+w, y+(2*h))]
-        topRight = [(x-w/2, y), (x-(3*w), y+(2*h))]
+        topLeft = [(x + w + w / 2, y), (x + (3 * w) + w, y + (2 * h))]
+        topRight = [(x - w / 2, y), (x - (3 * w), y + (2 * h))]
 
-        bottomLeft = [(x+w+w/2, y+(2*h)+(h/2)), (x+(3*w)+w, y+(5*h))]
-        bottomRight = [(x-w/2, y+(2*h)+(h/2)), (x-(3*w), y+(5*h))]
+        bottomLeft = [(x + w + w / 2, y + (2 * h) + (h / 2)), (x + (3 * w) + w, y + (5 * h))]
+        bottomRight = [(x - w / 2, y + (2 * h) + (h / 2)), (x - (3 * w), y + (5 * h))]
 
-        #top left
+        # top left
         cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
-        #top right
+        # top right
         cv2.rectangle(_frame, topRight[0], topRight[1], currentPerson.color, 2)
         # bottom left
         cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
@@ -167,17 +169,18 @@ def faceDetection():
 
             # rectangle must be in detection zones and smaller than detection area (I think)
 
-            if(inBounds(smallx, smally, smallw, smallh, x, y, w, h)):
+            if inBounds(smallx, smally, smallw, smallh, x, y, w, h):
                 cv2.rectangle(_frame, (smallx, smally), (smalla, smallb), (244, 66, 232), 2)
-                if (topRightBound(smallx, smally, x, y, w, h)):
+                if topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
                     Person.setMotion(_people[_i], 1, 1)
-                elif (topLeftBound(smallx, smally, smallw, smallh, x, y, w, h)):
+                elif topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
                     Person.setMotion(_people[_i], 0, 1)
-                elif (bottomRightBound(smallx, smally, x, y, w, h)):
+                elif bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
                     Person.setMotion(_people[_i], 3, 1)
-                elif (bottomLeftBound(smallx, smally, x, y, w, h)):
+                elif bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
                     Person.setMotion(_people[_i], 2, 1)
         _i += 1
+
 
 def displayProcessing():
     global _horizontal
@@ -196,14 +199,16 @@ def displayProcessing():
 
     _client.send(_frameText)
 
-    #if not _horizontal.data:
+    # if not _horizontal.data:
     cv2.imshow("preview", _horizontal)
-    #cv2.imshow("grayFeed", _grayFrame);
+    # cv2.imshow("grayFeed", _grayFrame);
+
 
 def exitProcessing():
     global _originalFeed
     _originalFeed.release()
     cv2.destroyAllWindows()
+
 
 def math():
     global _frameText
@@ -222,10 +227,9 @@ def math():
     else:
         divideby = numPeople
 
-
     for peeps in _people:
         print(peeps.motion)
-        #motion array needs to be reverted to zero if no motion is detected in the bounding boxes
+        # motion array needs to be reverted to zero if no motion is detected in the bounding boxes
         if peeps.motion[0] == 1 and peeps.motion[1] == 1:
             masterMotionStateArray[0] = masterMotionStateArray[0] + 1
             masterMotionStateArray[1] = masterMotionStateArray[1] + 1
@@ -244,21 +248,21 @@ def math():
     # check forward
     if masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
         _frameText = "forward"
-    #check reverse
+    # check reverse
     elif masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
         _frameText = "reverse"
-    #check forward left
+    # check forward left
     elif masterMotionStateArray[0] >= divideby:
         _frameText = "left"
-    #check forward right
+    # check forward right
     elif masterMotionStateArray[1] >= divideby:
         _frameText = "right"
-    #check reverse left
+    # check reverse left
     elif masterMotionStateArray[2] >= divideby:
         _frameText = "reverse"
-    #check reverse right
+    # check reverse right
     elif masterMotionStateArray[3] >= divideby:
-         _frameText = "reverse"
+        _frameText = "reverse"
     else:
         _frameText = "stop"
 
@@ -266,42 +270,44 @@ def math():
 def inBounds(smallx, smally, smallw, smallh, x, y, w, h):
     if topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
         return True
-    elif topRightBound(smallx, smally, x, y, w, h):
+    elif topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
         return True
-    elif bottomLeftBound(smallx, smally, x, y, w, h):
+    elif bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
         return True
-    elif bottomRightBound(smallx, smally, x, y, w, h):
+    elif bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
         return True
     else:
         return False
 
+
 def topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx > x+w+w/2 and smallx - smallw <= x+(3*w)+w:
-        if (smally > y and smally - smallh < y+(2*h)):
+    if smallx > x+w+w/2 and smallx + smallw <= x+(3*w)+w:
+        if (smally > y and smally + smallh < y+(2*h)):
             return True
     else:
         return False
 
-def topRightBound(smallx, smally, x, y, w, h):
-    if smallx < (x-w/2) and smallx > x-(3*w):
-        if smally > y and smally < (y+(2*h)):
-            return False
+def topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
+        if smally > y and smally + smallh < (y+(2*h)):
+            return True
     else:
         return False
 
-def bottomLeftBound(smallx, smally, x, y, w, h):
-    if smallx > x+w+w/2 and smallx < (x+(3*w)+w):
-        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
-            return False
+def bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+    if smallx > x+w+w/2 and smallx + smallw < (x+(3*w)+w):
+        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+            return True
     else:
         return False
 
-def bottomRightBound(smallx, smally, x, y, w, h):
-    if smallx < (x-w/2) and smallx > x-(3*w):
-        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
-            return False
+def bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
+        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+            return True
     else:
         return False
+
 
 main()
 exitProcessing()
