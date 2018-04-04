@@ -146,22 +146,27 @@ def faceDetection():
             (mx, my, mw, mh) = cv2.boundingRect(c)
 
             # coordinates for the smaller boxes
+            # top left corner
             smallx = mx + (mw / 4)
             smally = my + (mh / 4)
-            smallw = mx + mw - (mw / 4)
-            smallh = my + mh - (mh / 4)
+            # bottom right corner
+            smalla = mx + mw - (mw / 4)
+            smallb = my + mh - (mh / 4)
+            # width and height
+            smallw = mw - (mw / 4)
+            smallh = mh - (mh / 4)
 
             # midpoint of the box (not actually right now, im gonna fix it)
-            midx = smallx
-            midy = smally
+            midx = smallx + (smallw / 2)
+            midy = smally + (smallh / 2)
 
             # rectangle must be in detection zones and smaller than detection area (I think)
 
-            if(inBounds(smallx, smally, x, y, w, h)):
-                cv2.rectangle(_frame, (smallx, smally), (smallw, smallh), (244, 66, 232), 2)
+            if(inBounds(smallx, smally, smallw, smallh, x, y, w, h)):
+                cv2.rectangle(_frame, (smallx, smally), (smalla, smallb), (244, 66, 232), 2)
                 if (topRightBound(smallx, smally, x, y, w, h)):
                     Person.setMotion(_people[_i], 1, 1)
-                elif (topLeftBound(smallx, smally, x, y, w, h)):
+                elif (topLeftBound(smallx, smally, smallw, smallh, x, y, w, h)):
                     Person.setMotion(_people[_i], 0, 1)
                 elif (bottomRightBound(smallx, smally, x, y, w, h)):
                     Person.setMotion(_people[_i], 3, 1)
@@ -251,8 +256,8 @@ def math():
         _frameText = "stop"
 
 
-def inBounds(smallx, smally, x, y, w, h):
-    if topLeftBound(smallx, smally, x, y, w, h):
+def inBounds(smallx, smally, smallw, smallh, x, y, w, h):
+    if topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
         return True
     elif topRightBound(smallx, smally, x, y, w, h):
         return True
@@ -263,31 +268,31 @@ def inBounds(smallx, smally, x, y, w, h):
     else:
         return False
 
-def topLeftBound(smallx, smally, x, y, w, h):
-    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
-        if (smally > y and smally < y+(2*h)):
+def topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+    if smallx > x+w+w/2 and smallx - smallw <= x+(3*w)+w:
+        if (smally > y and smally - smallh < y+(2*h)):
             return True
     else:
         return False
 
 def topRightBound(smallx, smally, x, y, w, h):
-    if smallx < x-w/2 and smallx > x-(3*w):
-        if (smally > y and smally < y+(2*h)):
-            return True
+    if smallx < (x-w/2) and smallx > x-(3*w):
+        if smally > y and smally < (y+(2*h)):
+            return False
     else:
         return False
 
 def bottomLeftBound(smallx, smally, x, y, w, h):
-    if smallx > x+w+w/2 and smallx < x+(3*w)+w:
-        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
-            return True
+    if smallx > x+w+w/2 and smallx < (x+(3*w)+w):
+        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
+            return False
     else:
         return False
 
 def bottomRightBound(smallx, smally, x, y, w, h):
-    if smallx < x-w/2 and smallx > x-(3*w):
-        if (smally > y+(2*h)+(h/2) and smally < y+(5*h)):
-            return True
+    if smallx < (x-w/2) and smallx > x-(3*w):
+        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
+            return False
     else:
         return False
 
