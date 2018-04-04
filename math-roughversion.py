@@ -7,6 +7,7 @@ import imutils
 from Person import Person
 import Client
 
+# Needs Refactoring
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 
