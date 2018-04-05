@@ -5,7 +5,7 @@ import argparse
 import datetime
 import imutils
 from Person import Person
-import Client
+from Client import Client
 
 # Needs Refactoring
 # Referenced for motion detection:
@@ -53,7 +53,7 @@ def main():
 
     # Content start
     rval = firstFrame()
-    _client = Client
+    _client = Client()
 
     while rval:
         rval, _frame = _originalFeed.read()
@@ -94,7 +94,6 @@ def firstFrame():
     if _originalFeed.isOpened():  # try to get the first frame
         rvalLocal, _frame = _originalFeed.read()
         _frameText = "stop"
-        _client.send("stop")
         return rvalLocal
 
 
@@ -155,14 +154,14 @@ def faceDetection():
 
             # coordinates for the smaller boxes
             # top left corner
-            smallx = mx + (mw / 4)
-            smally = my + (mh / 4)
+            smallx = int(mx + (mw / 3))
+            smally = int(my + (mh / 3))
             # bottom right corner
-            smalla = mx + mw - (mw / 4)
-            smallb = my + mh - (mh / 4)
+            smalla = int(mx + mw - (mw / 3))
+            smallb = int(my + mh - (mh / 3))
             # width and height
-            smallw = mw - (mw / 4)
-            smallh = mh - (mh / 4)
+            smallw = int(mw - (mw / 3))
+            smallh = int(mh - (mh / 3))
 
             # midpoint of the box (not actually right now, im gonna fix it)
             midx = smallx + (smallw / 2)
@@ -198,7 +197,7 @@ def displayProcessing():
     cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
-    _client.send(_frameText)
+    Client.send(_client, _frameText)
 
     # if not _horizontal.data:
     cv2.imshow("preview", _horizontal)
@@ -282,29 +281,29 @@ def inBounds(smallx, smally, smallw, smallh, x, y, w, h):
 
 
 def topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx > x+w+w/2 and smallx + smallw <= x+(3*w)+w:
-        if (smally > y and smally + smallh < y+(2*h)):
+    if smallx > x+w+w/2 and smallx <= x+(3*w)+w:
+        if (smally > y and smally < y+(2*h)):
             return True
     else:
         return False
 
 def topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
-        if smally > y and smally + smallh < (y+(2*h)):
+    if smallx < (x-w/2) and smallx > x-(3*w):
+        if smally > y and smally < (y+(2*h)):
             return True
     else:
         return False
 
 def bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx > x+w+w/2 and smallx + smallw < (x+(3*w)+w):
-        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+    if smallx > x+w+w/2 and smallx < (x+(3*w)+w):
+        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
             return True
     else:
         return False
 
 def bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
-        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+    if smallx < (x-w/2) and smallx > x-(3*w):
+        if smally > y+(2*h)+(h/2) and smally < (y+(5*h)):
             return True
     else:
         return False
