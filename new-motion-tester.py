@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 capture = cv2.VideoCapture(0)
 
@@ -12,8 +13,8 @@ surface = width * height #Surface area of the image
 cursurface = 0 #Hold the current surface that have changed
 
 ######
-    grey_image = cv2.CreateImage(cv2.GetSize(frame), cv2.IPL_DEPTH_8U, 1)
-    moving_average = cv2.CreateImage(cv2.GetSize(frame), cv2.IPL_DEPTH_32F, 3)
+grey_image = np.zeros((width, height), np.uint8, 1)
+moving_average = np.zeros((width, height), np.uint32, 3)
 ######
 
 difference = None
