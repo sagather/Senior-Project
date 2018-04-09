@@ -33,26 +33,26 @@ while True:
         cv2.runningAvg(color_image, moving_average, 0.020, None) #Compute the average
 
     # Convert the scale of the moving average.
-    cv2.ConvertScale(moving_average, temp, 1.0, 0.0)
+    cv2.convertScale(moving_average, temp, 1.0, 0.0)
 
     # Minus the current frame from the moving average.
-    cv2.AbsDiff(color_image, temp, difference)
+    cv2.absDiff(color_image, temp, difference)
 
     #Convert the image so that it can be thresholded
-    cv2.CvtColor(difference, grey_image, cv.CV_RGB2GRAY)
-    cv2.Threshold(grey_image, grey_image, 70, 255, cv.CV_THRESH_BINARY)
+    cv2.cvtColor(difference, grey_image, cv2.COLOR_RGB2GRAY)
+    cv2.threshold(grey_image, grey_image, 70, 255, cv2.THRESH_BINARY)
 
-    cv2.Dilate(grey_image, grey_image, None, 18) #to get object blobs
-    cv2.Erode(grey_image, grey_image, None, 10)
+    cv2.dilate(grey_image, grey_image, None, 18) #to get object blobs
+    cv2.erode(grey_image, grey_image, None, 10)
 
     # Find contours
-    storage = cv2.CreateMemStorage(0)
-    contours = cv2.FindContours(grey_image, storage, cv2.CV_RETR_EXTERNAL, cv2.CV_CHAIN_APPROX_SIMPLE)
+    storage = cv2.createMemStorage(0)
+    contours = cv2.findContours(grey_image, storage, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     backcontours = contours #Save contours
 
     while contours: #For all contours compute the area
-        cursurface += cv2.ContourArea(contours)
+        cursurface += cv2.contourArea(contours)
         contours = contours.h_next()
 
     avg = (cursurface*100)/surface #Calculate the average of contour area on the total size
@@ -65,7 +65,7 @@ while True:
     _red =  (0, 0, 255); #Red for external contours
     _green =  (0, 255, 0);# Gren internal contours
     levels=1 #1 contours drawn, 2 internal contours as well, 3 ...
-    cv2.DrawContours (color_image, backcontours,  _red, _green, levels, 2, cv2.CV_FILLED)
+    cv2.drawContours (color_image, backcontours,  _red, _green, levels, 2, cv2.CV_FILLED)
 
     cv2.imshow("Target", color_image)
 
