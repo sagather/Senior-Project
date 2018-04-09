@@ -1,35 +1,36 @@
 import cv2
 import numpy as np
+import imutils
 
 capture = cv2.VideoCapture(0)
 
 frame = capture.read()
 
-width = frame.get(3)
-height = frame.get(4)
+width = capture.get(3)
+height = capture.get(4)
 
 surface = width * height #Surface area of the image
 
 cursurface = 0 #Hold the current surface that have changed
 
 ######
-grey_image = np.zeros((width, height), np.uint8, 1)
-moving_average = np.zeros((width, height), np.uint32, 3)
+grey_image = np.zeros((int(width), int(height)), np.uint8, 1)
+moving_average = np.zeros((int(width), int(height)), np.uint32, 3)
 ######
 
 difference = None
 
 while True:
-    color_image = capture.read()
-    cv2.GaussianBlur(color_image, (21, 21), 0)
+    _, color_image = capture.read()
+    color_image = cv2.GaussianBlur(color_image, (21, 21), 0)
 
 ########################
     if not difference: #For the first time put values in difference, temp and moving_average
-        difference = cv2.CloneImage(color_image)
-        temp = cv2.CloneImage(color_image)
-        cv2.ConvertScale(color_image, moving_average, 1.0, 0.0)
+        difference = color_image.copy()
+        temp = color_image.copy()
+        cv2.convertScaleAbs(color_image, moving_average, 1.0, 0.0)
     else:
-        cv2.RunningAvg(color_image, moving_average, 0.020, None) #Compute the average
+        cv2.runningAvg(color_image, moving_average, 0.020, None) #Compute the average
 
     # Convert the scale of the moving average.
     cv2.ConvertScale(moving_average, temp, 1.0, 0.0)
@@ -72,3 +73,13 @@ while True:
     key = cv2.waitKey(20)
     if key == 27:  # exit on ESC
         break
+
+def firstFrame():
+    global _frame
+    global _frameText
+    global _originalFeed
+    if _originalFeed.isOpened():  # try to get the first frame
+        rvalLocal, _frame = _originalFeed.read()
+        _frameText = "stop"
+        #_client.send("stop")
+        return rvalLocal
