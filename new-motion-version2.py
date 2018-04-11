@@ -10,7 +10,7 @@ class MotionDetectorContour:
     def run(self):
         # Capture first frame to get size
         #self.capture.open()
-        frame = self.capture.read()
+        _, frame = self.capture.read()
 
         width = self.capture.get(3)
         height = self.capture.get(4)
@@ -23,6 +23,7 @@ class MotionDetectorContour:
 
         while True:
             _, color_image = self.capture.read()
+            color_copy = color_image.copy()
             color_image = cv.GaussianBlur(color_image, (21, 21), 0)
 
             if difference is None: #For the first time put values in difference, temp and moving_average
@@ -69,9 +70,9 @@ class MotionDetectorContour:
             _red =  (0, 0, 255); #Red for external contours
             _green =  (0, 255, 0);# Gren internal contours
             levels=1 #1 contours drawn, 2 internal contours as well, 3 ...
-            cv.drawContours (color_image, backcontours, -1, (0, 255, 0), 2)
+            cv.drawContours (color_copy, backcontours, -2, (0, 255, 0), 2)
 
-            cv.imshow("Target", color_image)
+            cv.imshow("Target", color_copy)
 
             # Listen for ESC or ENTER key
             c = cv.waitKey(7) % 0x100
