@@ -5,16 +5,12 @@ import argparse
 import datetime
 import imutils
 from Person import Person
+import numpy as np
 #import Client
 
 # Needs Refactoring
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
-
-# Might be needed later
-#   _feedWidth = originalFeed.get(3)
-#   _feedHeight = originalFeed.get(4)
-# Global Variables
 
 _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
@@ -26,7 +22,7 @@ _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_defa
 # _face_cascade = cv2.CascadeClassifier(_originalFeed = cv2.VideoCapture(0)
 # '/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
-
+_originalFeed = cv2.VideoCapture(0)
 
 _ap = argparse.ArgumentParser()
 _ap.add_argument("-a", "--min-area", type=int, default=4000, help="minimum area size")
@@ -39,6 +35,14 @@ _thresh = None
 _frameText = ""
 _horizontal = None
 _people = []
+_width = None
+_height = None
+_surface = None
+_cursurface = 0
+_difference =None
+_temp = None
+_grey_image = None
+_moving_average = None
 #_client = None
 
 
@@ -49,18 +53,28 @@ def main():
     global _frame
     global _thresh
     global _people
+    global _difference
+    global _grey_image
+    global _moving_average
     #global _client
 
     # Content start
     rval = firstFrame()
     #_client = Client
 
+    _width = _originalFeed.get(3)
+    _height = _originalFeed.get(4)
+    _surface = _width * _height
+    _cursurface = 0
+    _difference = None
+    _grey_image = np.zeros([int(_height), int(_width), 1], np.uint8)
+    _moving_average = np.zeros([int(_height), int(_width), 3], np.float32)
+
     while rval:
         rval, _frame = _originalFeed.read()
-
-        _frame = imutils.resize(_frame, width=1000)
         _grayFrame = cv2.cvtColor(_frame, cv2.COLOR_BGR2GRAY)
         _grayFrame = cv2.GaussianBlur(_grayFrame, (21, 21), 0)
+
 
         if _firstFrame is None:
             _firstFrame = _grayFrame
@@ -108,6 +122,8 @@ def faceDetection():
     global _frameText
     global _horizontal
     global _people
+    global _originalFeed
+
 
     # Content Start
     _i = 0
@@ -144,26 +160,75 @@ def faceDetection():
         cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
         # bottom right
         cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
+        motionDetection(x, y, w, h, _i)
 
-        (_, cnts, _) = cv2.findContours(_thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        for c in cnts:
-            if cv2.contourArea(c) < _args["min_area"]:
-                continue
 
-            # rectangle must be in detection zones and smaller than detection area (I think)
+def motionDetection(x, y, w, h, _i):
+    global _width
+    global _height
+    global _people
+    global _originalFeed
+    global _frame
+    global _cursurface
+    global _surface
+    global _difference
+    global _temp
+    global _grey_image
+    global _moving_average
 
-            if inBounds(smallx, smally, smallw, smallh, x, y, w, h):
-                cv2.rectangle(_frame, (smallx, smally), (smalla, smallb), (244, 66, 232), 2)
-                if topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+    counter = len(_people)
+
+    while counter != 0:
+        _, color_image = _originalFeed.read()
+        #color_copy = color_image.copy()
+        color_image = cv2.GaussianBlur(color_image, (21, 21), 0)
+        if _difference is None:
+            _difference = color_image.copy()
+            _temp = color_image.copy()
+            cv2.convertScaleAbs(color_image, _moving_average, 1, 0.0)
+        else:
+            cv2.accumulateWeighted(color_image, _moving_average, 0.020, None)
+
+        cv2.convertScaleAbs(_moving_average, _temp, 1.0, 0.0)
+
+        cv2.absdiff(color_image, _temp, _difference)
+
+        cv2.cvtColor(_difference, cv2.COLOR_RGB2GRAY, _grey_image)
+        cv2.threshold(_grey_image, 70, 255, cv2.THRESH_BINARY, _grey_image)
+        kernel = np.ones((5, 5), np.uint8)
+
+        cv2.dilate(_grey_image, kernel, 18)
+        cv2.erode(_grey_image, kernel, 10)
+
+        contours = cv2.findContours(_grey_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = contours[0] if imutils.is_cv2() else contours[1]
+        backcontours = contours  # Save contours
+
+        for contour in contours:  # For all contours compute the area and get center point
+            _cursurface += cv2.contourArea(contour)
+            M = cv2.moments(contour)
+            if M["m00"] != 0:
+                cX = int(M["m10"] / M["m00"])
+                cY = int(M["m01"] / M["m00"])
+            else:
+                cX, cY = 0, 0
+
+        # draw contour and midpoint circle
+
+            if inBounds(x, y, w, h, cX, cY):
+                cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
+                cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
+                if topRightBound(x, y, w, h, cX, cY):
                     Person.setMotion(_people[_i], 1, 1)
-                elif topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+                elif topLeftBound(x, y, w, h, cX, cY):
                     Person.setMotion(_people[_i], 0, 1)
-                elif bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+                elif bottomRightBound(x, y, w, h, cX, cY):
                     Person.setMotion(_people[_i], 3, 1)
-                elif bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+                elif bottomLeftBound(x, y, w, h, cX, cY):
                     Person.setMotion(_people[_i], 2, 1)
-        _i += 1
+        counter = counter - 1
+
 
 
 def displayProcessing():
@@ -172,15 +237,16 @@ def displayProcessing():
     global _grayFrame
     global _frameText
     global _people
+    global _difference
 
     _horizontal = cv2.flip(_frame, 1)
+    _horizontal = imutils.resize(_horizontal, width=1000)
     cv2.putText(_horizontal, "Frame Status: {}".format(_frameText), (10, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(_horizontal, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-                (10, _frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+                (10, _horizontal.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
     cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-
     #_client.send(_frameText)
 
     # if not _horizontal.data:
@@ -250,43 +316,43 @@ def math():
         _frameText = "stop"
 
 
-def inBounds(smallx, smally, smallw, smallh, x, y, w, h):
-    if topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+def inBounds(x, y, w, h, cX, cY):
+    if topLeftBound(x, y, w, h, cX, cY):
         return True
-    elif topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+    elif topRightBound(x, y, w, h, cX, cY):
         return True
-    elif bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
+    elif bottomLeftBound(x, y, w, h, cX, cY):
         return True
-    elif bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
+    elif bottomRightBound(x, y, w, h, cX, cY):
         return True
     else:
         return False
 
 
-def topLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx > x+w+w/2 and smallx + smallw <= x+(3*w)+w:
-        if (smally > y and smally + smallh < y+(2*h)):
+def topLeftBound(x, y, w, h, cX, cY):
+    if cX > x+w+w/2 and cX  <= x+(3*w)+w:
+        if (cY > y and cY < y+(2*h)):
             return True
     else:
         return False
 
-def topRightBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
-        if smally > y and smally + smallh < (y+(2*h)):
+def topRightBound(x, y, w, h, cX, cY):
+    if cX < (x-w/2) and cX > x-(3*w):
+        if cY > y and cY < (y+(2*h)):
             return True
     else:
         return False
 
-def bottomLeftBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx > x+w+w/2 and smallx + smallw < (x+(3*w)+w):
-        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+def bottomLeftBound(x, y, w, h, cX, cY):
+    if cX > x+w+w/2 and cX < (x+(3*w)+w):
+        if cY > y+(2*h)+(h/2) and cY < (y+(5*h)):
             return True
     else:
         return False
 
-def bottomRightBound(smallx, smally, smallw, smallh, x, y, w, h):
-    if smallx + smallw < (x-w/2) and smallx > x-(3*w):
-        if smally > y+(2*h)+(h/2) and smally + smallh < (y+(5*h)):
+def bottomRightBound(x, y, w, h, cX, cY):
+    if cX < (x-w/2) and cX > x-(3*w):
+        if cY > y+(2*h)+(h/2) and cY < (y+(5*h)):
             return True
     else:
         return False
