@@ -25,7 +25,7 @@ class MotionDetectorContour:
             _, color_image = self.capture.read()
             color_image = cv.GaussianBlur(color_image, (21, 21), 0)
 
-            if not difference: #For the first time put values in difference, temp and moving_average
+            if difference is None: #For the first time put values in difference, temp and moving_average
                 difference = color_image.copy()
                 temp = color_image.copy()
                 cv.convertScaleAbs(color_image, moving_average, 1.0, 0.0)
@@ -41,21 +41,23 @@ class MotionDetectorContour:
             #Convert the image so that it can be thresholded
             cv.cvtColor(difference, cv.COLOR_RGB2GRAY, grey_image)
             cv.threshold(grey_image, 70, 255, cv.THRESH_BINARY, grey_image)
-            cv.dilate(grey_image, grey_image, None, 18) #to get object blobs
+            kernel = np.ones((5, 5), np.uint8)
 
-############ cv.dilate <- This is how far I got
 
-            cv.erode(grey_image, grey_image, None, 10)
+            cv.dilate(grey_image, kernel, 18) #to get object blobs
+            # grey_image = cv.dilate(grey_image, kernel, 18)
+            cv.erode(grey_image, kernel, 10)
+            # grey_image = cv.erode(grey_image, kernel, 18)
 
             # Find contours
-            storage = []
-            contours = cv.findContours(grey_image, storage, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
+            image, contours, hierarchy = cv.findContours(grey_image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+            contours = np.asarray(contours)
             backcontours = contours #Save contours
 
-            while contours: #For all contours compute the area
-                cursurface += cv.contourArea(contours)
-                contours = contours.h_next()
+            for contour in contours: #For all contours compute the area
+                cursurface += cv.contourArea(contour)
+                #contours = contours.next()
 
             avg = (cursurface*100)/surface #Calculate the average of contour area on the total size
             if avg > self.ceil:
@@ -67,7 +69,7 @@ class MotionDetectorContour:
             _red =  (0, 0, 255); #Red for external contours
             _green =  (0, 255, 0);# Gren internal contours
             levels=1 #1 contours drawn, 2 internal contours as well, 3 ...
-            cv.drawContours (color_image, backcontours,  _red, _green, levels, 2, cv.FILLED)
+            cv.drawContours (color_image, backcontours, -1, (0, 255, 0), 2)
 
             cv.imshow("Target", color_image)
 
