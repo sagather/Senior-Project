@@ -66,6 +66,7 @@ class MotionDetectorContour:
                 else:
                     cX, cY = 0, 0
 
+                # draw contour and midpoint circle
                 cv.drawContours (color_copy, [contour], -2, (0, 255, 0), 2)
                 cv.circle(color_copy, (cX, cY), 3, (255, 0, 0), -1)
 
