@@ -14,8 +14,11 @@ surface = width * height #Surface area of the image
 cursurface = 0 #Hold the current surface that have changed
 
 ######
-grey_image = np.zeros((int(width), int(height)), np.uint8, 1)
+grey_image = cv2.convertScaleAbs()
 moving_average = np.zeros((int(width), int(height)), np.uint32, 3)
+
+#grey_image = np.zeros((int(width), int(height)), np.uint8, 1)
+#moving_average = np.zeros((int(width), int(height)), np.uint32, 3)
 ######
 
 difference = None

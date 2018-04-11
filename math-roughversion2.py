@@ -177,57 +177,52 @@ def motionDetection(x, y, w, h, _i):
     global _grey_image
     global _moving_average
 
-    counter = len(_people)
+    _, color_image = _originalFeed.read()
+    #color_copy = color_image.copy()
+    color_image = cv2.GaussianBlur(color_image, (21, 21), 0)
+    if _difference is None:
+        _difference = color_image.copy()
+        _temp = color_image.copy()
+        cv2.convertScaleAbs(color_image, _moving_average, 1, 0.0)
+    else:
+        cv2.accumulateWeighted(color_image, _moving_average, 0.020, None)
 
-    while counter != 0:
-        _, color_image = _originalFeed.read()
-        #color_copy = color_image.copy()
-        color_image = cv2.GaussianBlur(color_image, (21, 21), 0)
-        if _difference is None:
-            _difference = color_image.copy()
-            _temp = color_image.copy()
-            cv2.convertScaleAbs(color_image, _moving_average, 1, 0.0)
+    cv2.convertScaleAbs(_moving_average, _temp, 1.0, 0.0)
+
+    cv2.absdiff(color_image, _temp, _difference)
+
+    cv2.cvtColor(_difference, cv2.COLOR_RGB2GRAY, _grey_image)
+    cv2.threshold(_grey_image, 70, 255, cv2.THRESH_BINARY, _grey_image)
+    kernel = np.ones((5, 5), np.uint8)
+
+    cv2.dilate(_grey_image, kernel, 18)
+    cv2.erode(_grey_image, kernel, 10)
+
+    contours = cv2.findContours(_grey_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = contours[0] if imutils.is_cv2() else contours[1]
+    backcontours = contours  # Save contours
+
+    for contour in contours:  # For all contours compute the area and get center point
+        _cursurface += cv2.contourArea(contour)
+        M = cv2.moments(contour)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
         else:
-            cv2.accumulateWeighted(color_image, _moving_average, 0.020, None)
+            cX, cY = 0, 0
 
-        cv2.convertScaleAbs(_moving_average, _temp, 1.0, 0.0)
-
-        cv2.absdiff(color_image, _temp, _difference)
-
-        cv2.cvtColor(_difference, cv2.COLOR_RGB2GRAY, _grey_image)
-        cv2.threshold(_grey_image, 70, 255, cv2.THRESH_BINARY, _grey_image)
-        kernel = np.ones((5, 5), np.uint8)
-
-        cv2.dilate(_grey_image, kernel, 18)
-        cv2.erode(_grey_image, kernel, 10)
-
-        contours = cv2.findContours(_grey_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = contours[0] if imutils.is_cv2() else contours[1]
-        backcontours = contours  # Save contours
-
-        for contour in contours:  # For all contours compute the area and get center point
-            _cursurface += cv2.contourArea(contour)
-            M = cv2.moments(contour)
-            if M["m00"] != 0:
-                cX = int(M["m10"] / M["m00"])
-                cY = int(M["m01"] / M["m00"])
-            else:
-                cX, cY = 0, 0
-
-        # draw contour and midpoint circle
-
-            if inBounds(x, y, w, h, cX, cY):
-                cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
-                cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
-                if topRightBound(x, y, w, h, cX, cY):
-                    Person.setMotion(_people[_i], 1, 1)
-                elif topLeftBound(x, y, w, h, cX, cY):
-                    Person.setMotion(_people[_i], 0, 1)
-                elif bottomRightBound(x, y, w, h, cX, cY):
-                    Person.setMotion(_people[_i], 3, 1)
-                elif bottomLeftBound(x, y, w, h, cX, cY):
-                    Person.setMotion(_people[_i], 2, 1)
-        counter = counter - 1
+    # draw contour and midpoint circle
+        if inBounds(x, y, w, h, cX, cY):
+            cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
+            cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
+            if topRightBound(x, y, w, h, cX, cY):
+                Person.setMotion(_people[_i], 1, 1)
+            elif topLeftBound(x, y, w, h, cX, cY):
+                Person.setMotion(_people[_i], 0, 1)
+            elif bottomRightBound(x, y, w, h, cX, cY):
+                Person.setMotion(_people[_i], 3, 1)
+            elif bottomLeftBound(x, y, w, h, cX, cY):
+                Person.setMotion(_people[_i], 2, 1)
 
 
 
