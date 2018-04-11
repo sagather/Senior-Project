@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import imutils
 
 class MotionDetectorContour:
     def __init__(self,ceil=15):
@@ -52,25 +53,21 @@ class MotionDetectorContour:
 
             # Find contours
 
-            image, contours, hierarchy = cv.findContours(grey_image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-            contours = np.asarray(contours)
+            contours = cv.findContours(grey_image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+            contours = contours[0] if imutils.is_cv2() else contours[1]
             backcontours = contours #Save contours
 
-            for contour in contours: #For all contours compute the area
+            for contour in contours: #For all contours compute the area and get center point
                 cursurface += cv.contourArea(contour)
-                #contours = contours.next()
+                M = cv.moments(contour)
+                if M["m00"] != 0:
+                    cX = int(M["m10"] / M["m00"])
+                    cY = int(M["m01"] / M["m00"])
+                else:
+                    cX, cY = 0, 0
 
-            avg = (cursurface*100)/surface #Calculate the average of contour area on the total size
-            if avg > self.ceil:
-                print "Something is moving !"
-            #print avg,"%"
-            cursurface = 0 #Put back the current surface to 0
-
-            #Draw the contours on the image
-            _red =  (0, 0, 255); #Red for external contours
-            _green =  (0, 255, 0);# Gren internal contours
-            levels=1 #1 contours drawn, 2 internal contours as well, 3 ...
-            cv.drawContours (color_copy, backcontours, -2, (0, 255, 0), 2)
+                cv.drawContours (color_copy, [contour], -2, (0, 255, 0), 2)
+                cv.circle(color_copy, (cX, cY), 3, (255, 0, 0), -1)
 
             cv.imshow("Target", color_copy)
 
