@@ -12,15 +12,14 @@ import numpy as np
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 
-_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+#_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
 # for Sam
 # _face_cascade = cv2.CascadeClassifier(
 # '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 # for James
-# _face_cascade = cv2.CascadeClassifier(_originalFeed = cv2.VideoCapture(0)
-# '/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+_face_cascade = cv2.CascadeClassifier('/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -133,15 +132,8 @@ def faceDetection():
         _people.append(Person())
         currentPerson = _people[_i]
 
-        # Lazy way to change color
-        if _i == 0:
-            Person.setColor(_people[_i], 255, 0, 0)  # Blue for 1st face
-        if _i == 1:
-            Person.setColor(_people[_i], 0, 255, 255)  # Yellow for 2nd face
-        if _i == 2:
-            Person.setColor(_people[_i], 255, 255, 0)  # Teal for 3rd face
-        if _i == 3:
-            Person.setColor(_people[_i], 0, 100, 255)  # Orange for 4th face
+        # Lazy way to change face color
+        getColor(_i)
 
         cv2.rectangle(_frame, (x, y), (x + w, y + h),
                       (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
@@ -161,6 +153,7 @@ def faceDetection():
         # bottom right
         cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
         motionDetection(x, y, w, h, _i)
+        _i+=1
 
 
 
@@ -214,7 +207,7 @@ def motionDetection(x, y, w, h, _i):
     # draw contour and midpoint circle
         if inBounds(x, y, w, h, cX, cY):
             cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
-            cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
+            cv2.circle(_frame, (cX, cY), 3, (0, 0, 255), -1)
             if topRightBound(x, y, w, h, cX, cY):
                 Person.setMotion(_people[_i], 1, 1)
             elif topLeftBound(x, y, w, h, cX, cY):
@@ -351,6 +344,27 @@ def bottomRightBound(x, y, w, h, cX, cY):
             return True
     else:
         return False
+
+def getColor(_i):
+    if _i == 0:
+        Person.setColor(_people[_i], 255, 0, 0)  # Blue for 1st face
+    elif _i == 1:
+        Person.setColor(_people[_i], 0, 255, 255)  # Yellow for 2nd face
+    elif _i == 2:
+        Person.setColor(_people[_i], 255, 255, 0)  # Teal for 3rd face
+    elif _i == 3:
+        Person.setColor(_people[_i], 0, 100, 255) # Orange
+    elif _i == 4:
+        Person.setColor(_people[_i], 255, 0, 255) # Purple
+    elif _i == 5:
+        Person.setColor(_people[_i], 255, 255, 255) # White
+    elif _i == 6:
+        Person.setColor(_people[_i], 100, 100, 100) # Grey
+    elif _i == 7:
+        Person.setColor(_people[_i], 140, 0, 255) # Pink
+    else:
+        Person.setColor(_people[_i], 0, 0, 0)  # Black
+
 
 
 main()
