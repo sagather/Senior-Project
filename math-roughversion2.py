@@ -12,14 +12,14 @@ import numpy as np
 # Referenced for motion detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 
-#_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
+_face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
 # for Sam
 # _face_cascade = cv2.CascadeClassifier(
 # '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 # for James
-_face_cascade = cv2.CascadeClassifier('/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+#_face_cascade = cv2.CascadeClassifier('/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
