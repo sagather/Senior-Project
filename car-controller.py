@@ -6,7 +6,7 @@ import argparse
 import datetime
 import imutils
 from Person import Person
-# import Client
+import Client
 
 # References for Motion Detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
@@ -42,7 +42,7 @@ _difference =None
 _temp = None
 _grey_image = None
 _moving_average = None
-#_client = None
+_client = None
 
 def main():
     # Global Declarations
@@ -56,11 +56,11 @@ def main():
     global _moving_average
     global _width
     global _height
-    # global _client
+    global _client
 
     # Main Code
     rval = firstFrame()
-    #_client = Client
+    _client = Client()
     _width = _originalFeed.get(3)
     _height = _originalFeed.get(4)
     _grey_image = np.zeros([int(_height), int(_width), 1], np.uint8)
@@ -110,7 +110,7 @@ def firstFrame():
     if _originalFeed.isOpened():
         rvalLocal, _frame = _originalFeed.read()
         _frameText = "stop"
-        #_client.send("stop")
+        _client.send("stop")
         return rvalLocal
 
 
@@ -133,14 +133,13 @@ def faceDetection():
     for (x, y, w, h) in facesDectected:
         # Add new person to people list if face detected
         _people.append(Person())
-        currentPerson = _people[_i]
 
         # get a color for the persons face detection
         getColor(_i)
 
         # Draw the initial face box
         cv2.rectangle(_frame, (x, y), (x + w, y + h),
-                      (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
+                      (_people[_i].color[0], _people[_i].color[1], _people[_i].color[2]), 2)
 
         # Bounding box locations
         topLeft = [(x + w, y), (x + int(round(2.5 * w)), y + int(round(1.5 * h)))]
@@ -151,19 +150,20 @@ def faceDetection():
 
         # Draw bounding boxes
         # top left
-        cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, topLeft[0], topLeft[1], _people[_i].color, 2)
         # top right
-        cv2.rectangle(_frame, topRight[0], topRight[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, topRight[0], topRight[1], _people[_i].color, 2)
         # bottom left
-        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, bottomLeft[0], bottomLeft[1], _people[_i].color, 2)
         # bottom right
-        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
+        cv2.rectangle(_frame, bottomRight[0], bottomRight[1], _people[_i].color, 2)
 
         # Call on the motion detection only if a face is detected
+        print("x: {} y: {} w: {} h: {} i:{}".format(x,y,w,h,_i))
         motionDetection(x, y, w, h, _i)
+        _i = _i + 1
 
-    # Increment Counter
-    _i += 1
+
 
 
 def motionDetection(x, y, w, h, _i):
@@ -203,7 +203,7 @@ def motionDetection(x, y, w, h, _i):
 
     contours = cv2.findContours(_grey_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[0] if imutils.is_cv2() else contours[1]
-
+    temp = [0, 0, 0, 0]
     for contour in contours:  # For all contours compute the area and get center point
         _cur_surface += cv2.contourArea(contour)
         M = cv2.moments(contour)
@@ -212,19 +212,19 @@ def motionDetection(x, y, w, h, _i):
             cY = int(M["m01"] / M["m00"])
         else:
             cX, cY = 0, 0
-
         # draw contour and midpoint circle
         if inBounds(x, y, w, h, cX, cY):
             cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
             cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
             if topRightBound(x, y, w, h, cX, cY):
-                Person.setMotion(_people[_i], 1, 1)
+                temp[1] = 1
             elif topLeftBound(x, y, w, h, cX, cY):
-                Person.setMotion(_people[_i], 0, 1)
+                temp[0] = 1
             elif bottomRightBound(x, y, w, h, cX, cY):
-                Person.setMotion(_people[_i], 3, 1)
+                temp[3] = 1
             elif bottomLeftBound(x, y, w, h, cX, cY):
-                Person.setMotion(_people[_i], 2, 1)
+                temp[2] = 1
+    Person.setMotion(_people[_i],temp[0], temp[1], temp[2], temp[3])
 
 
 def displayProcessing():
@@ -245,7 +245,7 @@ def displayProcessing():
                 (10, _horizontal.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
     cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-    # _client.send(_frameText)
+    _client.send(_frameText)
 
     cv2.imshow("preview", _horizontal)
 
@@ -259,11 +259,11 @@ def math():
     masterMotionStateArray = [0, 0, 0, 0]
     numPeople = len(_people)
     if numPeople == 1 or numPeople == 2:
-        divide_by = numPeople
+        divideby = numPeople
     elif numPeople > 2:
-        divide_by = round(numPeople / 2)
+        divideby = round(numPeople/2)
     else:
-        divide_by = 100000;
+        divideby = 100000;
 
     for people in _people:
         if people.motion[0] == 1 and people.motion[1] == 1:
@@ -280,27 +280,28 @@ def math():
             masterMotionStateArray[2] = masterMotionStateArray[2] + 1
         elif people.motion[3] == 1:
             masterMotionStateArray[3] = masterMotionStateArray[3] + 1
+        people.clearMotion
 
     # default
     if numPeople == 0:
         _frameText = "stop"
     # check forward
-    if masterMotionStateArray[0] == masterMotionStateArray[1] and masterMotionStateArray[0] >= divide_by and masterMotionStateArray[1] >= divide_by:
+    if masterMotionStateArray[0] == masterMotionStateArray[1] and masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
         _frameText = "forward"
     # check reverse
-    elif masterMotionStateArray[2] == masterMotionStateArray[3] and masterMotionStateArray[2] >= divide_by and masterMotionStateArray[3] >= divide_by:
+    elif masterMotionStateArray[2] == masterMotionStateArray[3] and masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
         _frameText = "reverse"
     # check forward left
-    elif masterMotionStateArray[0] >= divide_by:
+    elif masterMotionStateArray[0] >= divideby:
         _frameText = "left"
     # check forward right
-    elif masterMotionStateArray[1] >= divide_by:
+    elif masterMotionStateArray[1] >= divideby:
         _frameText = "right"
     # check reverse left
-    elif masterMotionStateArray[2] >= divide_by:
+    elif masterMotionStateArray[2] >= divideby:
         _frameText = "reverse"
     # check reverse right
-    elif masterMotionStateArray[3] >= divide_by:
+    elif masterMotionStateArray[3] >= divideby:
         _frameText = "reverse"
     else:
         _frameText = "stop"
@@ -322,9 +323,7 @@ def inBounds(x, y, w, h, cX, cY):
 
 # topLeft = [(x + w, y), (x + int(round(2.5 * w)), y + int(round(1.5 * h)))]
 def topLeftBound(x, y, w, h, cX, cY):
-    # Content Start
-    topLeft = [(x + w), y, x + int(round(2.5 * w)),
-               y + int(round(1.5 * h))]
+    topLeft = [(x + w), y, x + int(round(2.5 * w)), y + int(round(1.5 * h))]
     if cX > topLeft[0] and cX  <= topLeft[2]:
         if cY > topLeft[1] and cY < topLeft[3]:
             return True
@@ -334,9 +333,7 @@ def topLeftBound(x, y, w, h, cX, cY):
 
 # topRight = [(x, y), (x - int(round(1.5 * w)), y + int(round(1.5 * h)))]
 def topRightBound(x, y, w, h, cX, cY):
-    # Content Start
-    topRight = [x, y, x - int(round(1.5 * w)),
-                y + int(round(1.5 * h))]
+    topRight = [x, y, x - int(round(1.5 * w)), y + int(round(1.5 * h))]
     if cX < topRight[0] and cX > topRight[2]:
         if cY > topRight[1] and cY < topRight[3]:
             return True
@@ -346,9 +343,7 @@ def topRightBound(x, y, w, h, cX, cY):
 
 # bottomLeft = [(x + int(round(1.5*w)), y + int(round(2.5 * h)) + (h / 2)), (x + (2 * w) + w, y + int(round(5.5 * h)))]
 def bottomLeftBound(x, y, w, h, cX, cY):
-    # Content Start
-    bottomLeft = [x + int(round(1.5*w)), y + int(round(2.5 * h) + (h / 2)),
-                  x + (2 * w) + w, y + int(round(5.5 * h))]
+    bottomLeft = [x + int(round(1.5*w)), y + int(round(2.5 * h) + (h / 2)), x + (2 * w) + w, y + int(round(5.5 * h))]
     if cX > bottomLeft[0] and cX < bottomLeft[2]:
         if cY > bottomLeft[1] and cY < bottomLeft[3]:
             return True
@@ -358,9 +353,8 @@ def bottomLeftBound(x, y, w, h, cX, cY):
 
 # bottomRight = [(x - int(round(w/2)), y + int(round(2.5 * h)) + (h / 2)), (x - (2 * w), y + int(round(5.5 * h)))]
 def bottomRightBound(x, y, w, h, cX, cY):
-    # Content Start
     bottomRight = [x - int(round(w/2)), y + int(round(2.5 * h) + (h / 2)), x - (2 * w), y + int(round(5.5 * h))]
-    if cX > bottomRight[0] and cX < bottomRight[2]:
+    if cX < bottomRight[0] and cX > bottomRight[2]:
         if cY > bottomRight[1] and cY < bottomRight[3]:
             return True
     else:

@@ -4,7 +4,7 @@ class Person():
     personCount = 0
     color = [0, 0, 0]
     # _motionStateArray = [topleft, topright, bottomleft, bottomright]
-    motion = [0, 0, 0, 0, 0, 0]
+    motion = [0, 0, 0, 0]
 
     def __init__(self):
         Person.personCount += 1
@@ -12,8 +12,11 @@ class Person():
     def setColor(self, r, g, b):
         self.color = [r, g, b]
 
-    def setMotion(self, index, value):
-        self.motion[index] = value
+    def setMotion(self, left, right, lowerl, lowerr):
+        self.motion = [left, right, lowerl, lowerr]
+
+    #def setMotion(self, index):
+    #    self.motion[index] = 1
 
     def clearMotion(self):
         self.motion[0] = 0
