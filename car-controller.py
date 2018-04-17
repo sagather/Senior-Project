@@ -6,7 +6,7 @@ import argparse
 import datetime
 import imutils
 from Person import Person
-import Client
+from clcomp import Client
 
 # References for Motion Detection:
 # https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
@@ -110,7 +110,6 @@ def firstFrame():
     if _originalFeed.isOpened():
         rvalLocal, _frame = _originalFeed.read()
         _frameText = "stop"
-        _client.send("stop")
         return rvalLocal
 
 
