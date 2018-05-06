@@ -98,7 +98,7 @@ def main():
         if key == 27:  # exit on ESC
             break
 
-
+# Returns the first frame captured by the camera
 def firstFrame():
     # Global Declarations
     global _frame
@@ -112,7 +112,7 @@ def firstFrame():
         _frameText = "stop"
         return rvalLocal
 
-
+# Detects faces in frame and creates a "Person" for each one, assigns each face a color up to 8 faces
 def faceDetection():
     # Global Declarations
     global _firstFrame
@@ -164,7 +164,7 @@ def faceDetection():
 
 
 
-
+# Find motion in frame and display motion in preview window
 def motionDetection(x, y, w, h, _i):
     # Global Dec
     global _width
@@ -179,6 +179,7 @@ def motionDetection(x, y, w, h, _i):
     global _moving_average
 
     # Content Start
+    # processes image to better find differences in frames to be counted as motion
     _, color_image = _originalFeed.read()
     color_image = cv2.GaussianBlur(color_image, (21, 21), 0)
 
@@ -212,7 +213,7 @@ def motionDetection(x, y, w, h, _i):
         else:
             cX, cY = 0, 0
         # draw contour and midpoint circle
-        if inBounds(x, y, w, h, cX, cY):
+        if inBounds(x, y, w, h, cX, cY): # check if motion is in a box, and if so which one
             cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
             cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
             if topRightBound(x, y, w, h, cX, cY):
@@ -226,6 +227,7 @@ def motionDetection(x, y, w, h, _i):
     Person.setMotion(_people[_i],temp[0], temp[1], temp[2], temp[3])
 
 
+# Add display text and show frame
 def displayProcessing():
     # Global Declarations
     global _horizontal
@@ -238,6 +240,8 @@ def displayProcessing():
     # Content Start
     _horizontal = cv2.flip(_frame, 1)
     _horizontal = imutils.resize(_horizontal, width=1000)
+
+    # Add text to frame to display time stamp, motion direction, and faces in frame
     cv2.putText(_horizontal, "Frame Status: {}".format(_frameText), (10, 20),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(_horizontal, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
@@ -249,6 +253,7 @@ def displayProcessing():
     cv2.imshow("preview", _horizontal)
 
 
+# Determines motion direction of each person to find common direction
 def math():
     # Global Declarations
     global _frameText
@@ -264,6 +269,7 @@ def math():
     else:
         divideby = 100000;
 
+    # Updates master motion array with each person's motion state then clears each person's motion array
     for people in _people:
         if people.motion[0] == 1 and people.motion[1] == 1:
             masterMotionStateArray[0] = masterMotionStateArray[0] + 1
@@ -306,6 +312,7 @@ def math():
         _frameText = "stop"
 
 
+# Checks if center of motion contour is within a bounding box
 def inBounds(x, y, w, h, cX, cY):
     # Content Start
     if topLeftBound(x, y, w, h, cX, cY):
@@ -319,7 +326,7 @@ def inBounds(x, y, w, h, cX, cY):
     else:
         return False
 
-
+# Checks if center of motion contour is within the top left box
 # topLeft = [(x + w, y), (x + int(round(2.5 * w)), y + int(round(1.5 * h)))]
 def topLeftBound(x, y, w, h, cX, cY):
     topLeft = [(x + w), y, x + int(round(2.5 * w)), y + int(round(1.5 * h))]
@@ -329,7 +336,7 @@ def topLeftBound(x, y, w, h, cX, cY):
     else:
         return False
 
-
+# Checks if center of motion contour is within the top right box
 # topRight = [(x, y), (x - int(round(1.5 * w)), y + int(round(1.5 * h)))]
 def topRightBound(x, y, w, h, cX, cY):
     topRight = [x, y, x - int(round(1.5 * w)), y + int(round(1.5 * h))]
@@ -339,7 +346,7 @@ def topRightBound(x, y, w, h, cX, cY):
     else:
         return False
 
-
+# Checks if center of motion contour is within the bottom left box
 # bottomLeft = [(x + int(round(1.5*w)), y + int(round(2.5 * h)) + (h / 2)), (x + (2 * w) + w, y + int(round(5.5 * h)))]
 def bottomLeftBound(x, y, w, h, cX, cY):
     bottomLeft = [x + int(round(1.5*w)), y + int(round(2.5 * h) + (h / 2)), x + (2 * w) + w, y + int(round(5.5 * h))]
@@ -349,7 +356,7 @@ def bottomLeftBound(x, y, w, h, cX, cY):
     else:
         return False
 
-
+# Checks if center of motion contour is within the bottom right box
 # bottomRight = [(x - int(round(w/2)), y + int(round(2.5 * h)) + (h / 2)), (x - (2 * w), y + int(round(5.5 * h)))]
 def bottomRightBound(x, y, w, h, cX, cY):
     bottomRight = [x - int(round(w/2)), y + int(round(2.5 * h) + (h / 2)), x - (2 * w), y + int(round(5.5 * h))]
