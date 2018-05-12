@@ -6,7 +6,6 @@ import datetime
 import imutils
 from Person import Person
 import numpy as np
-from clcomp import Client
 
 # Needs Refactoring
 # Referenced for motion detection:
