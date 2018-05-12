@@ -6,7 +6,7 @@ import datetime
 import imutils
 from Person import Person
 import numpy as np
-#import Client
+from clcomp import Client
 
 # Needs Refactoring
 # Referenced for motion detection:
@@ -19,7 +19,8 @@ _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_defa
 # '/Users/bcxtr/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 # for James
-#_face_cascade = cv2.CascadeClassifier('/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
+# _face_cascade = cv2.CascadeClassifier(_originalFeed = cv2.VideoCapture(0)
+# '/Users/jamesbayman/PycharmProjects/Senior-Project/HaarCascades/haarcascade_frontalface_default.xml')
 
 _originalFeed = cv2.VideoCapture(0)
 
@@ -132,17 +133,16 @@ def faceDetection():
         _people.append(Person())
         currentPerson = _people[_i]
 
-        # Lazy way to change face color
         getColor(_i)
-
+        
         cv2.rectangle(_frame, (x, y), (x + w, y + h),
                       (currentPerson.color[0], currentPerson.color[1], currentPerson.color[2]), 2)
 
-        topLeft = [(x + w + w / 2, y), (x + (3 * w) + w, y + (2 * h))]
-        topRight = [(x - w / 2, y), (x - (3 * w), y + (2 * h))]
+        topLeft = [(x + w, y), (x + int(round(2.5 * w)), y + int(round(1.5 * h)))]
+        topRight = [(x, y), (x - int(round(1.5 * w)), y + int(round(1.5 * h)))]
 
-        bottomLeft = [(x + w + w / 2, y + (2 * h) + (h / 2)), (x + (3 * w) + w, y + (5 * h))]
-        bottomRight = [(x - w / 2, y + (2 * h) + (h / 2)), (x - (3 * w), y + (5 * h))]
+        bottomLeft = [(x + int(round(1.5*w)), y + int(round(2.5 * h)) + (h / 2)), (x + (2 * w) + w, y + int(round(5.5 * h)))]
+        bottomRight = [(x - int(round(w/2)), y + int(round(2.5 * h)) + (h / 2)), (x - (2 * w), y + int(round(5.5 * h)))]
 
         # top left
         cv2.rectangle(_frame, topLeft[0], topLeft[1], currentPerson.color, 2)
@@ -153,8 +153,7 @@ def faceDetection():
         # bottom right
         cv2.rectangle(_frame, bottomRight[0], bottomRight[1], currentPerson.color, 2)
         motionDetection(x, y, w, h, _i)
-        _i+=1
-
+    _i += 1
 
 
 def motionDetection(x, y, w, h, _i):
@@ -207,7 +206,7 @@ def motionDetection(x, y, w, h, _i):
     # draw contour and midpoint circle
         if inBounds(x, y, w, h, cX, cY):
             cv2.drawContours(_frame, [contour], -2, (0, 255, 0), 2)
-            cv2.circle(_frame, (cX, cY), 3, (0, 0, 255), -1)
+            cv2.circle(_frame, (cX, cY), 3, (255, 0, 0), -1)
             if topRightBound(x, y, w, h, cX, cY):
                 Person.setMotion(_people[_i], 1, 1)
             elif topLeftBound(x, y, w, h, cX, cY):
@@ -216,7 +215,6 @@ def motionDetection(x, y, w, h, _i):
                 Person.setMotion(_people[_i], 3, 1)
             elif bottomLeftBound(x, y, w, h, cX, cY):
                 Person.setMotion(_people[_i], 2, 1)
-
 
 
 def displayProcessing():
@@ -254,16 +252,12 @@ def math():
     masterMotionStateArray = [0, 0, 0, 0]
 
     numPeople = len(_people)
-    divideby = 0
-
-    if numPeople == 4:
-        divideby = 3
-    elif numPeople == 3:
-        divideby = 2
-    elif numPeople == 0:
-        divideby = 100
-    else:
+    if numPeople == 1 or numPeople == 2:
         divideby = numPeople
+    elif numPeople > 2:
+        divideby = round(numPeople/2)
+    else:
+        divideby = 100000;
 
     for peeps in _people:
         # motion array needs to be reverted to zero if no motion is detected in the bounding boxes
@@ -282,11 +276,14 @@ def math():
         elif peeps.motion[3] == 1:
             masterMotionStateArray[3] = masterMotionStateArray[3] + 1
 
+    # default
+    if numPeople == 0:
+        _frameText = "stop"
     # check forward
-    if masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
+    if masterMotionStateArray[0] == masterMotionStateArray[1] and masterMotionStateArray[0] >= divideby and masterMotionStateArray[1] >= divideby:
         _frameText = "forward"
     # check reverse
-    elif masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
+    elif masterMotionStateArray[2] == masterMotionStateArray[3] and masterMotionStateArray[2] >= divideby and masterMotionStateArray[3] >= divideby:
         _frameText = "reverse"
     # check forward left
     elif masterMotionStateArray[0] >= divideby:
@@ -317,30 +314,41 @@ def inBounds(x, y, w, h, cX, cY):
         return False
 
 
+# topLeft = [(x + w, y), (x + int(round(2.5 * w)), y + int(round(1.5 * h)))]
 def topLeftBound(x, y, w, h, cX, cY):
-    if cX > x+w+w/2 and cX  <= x+(3*w)+w:
-        if (cY > y and cY < y+(2*h)):
+    topLeft = [(x + w), y, x + int(round(2.5 * w)), y + int(round(1.5 * h))]
+    if cX > topLeft[0] and cX  <= topLeft[2]:
+        if cY > topLeft[1] and cY < topLeft[3]:
             return True
     else:
         return False
 
+
+# topRight = [(x, y), (x - int(round(1.5 * w)), y + int(round(1.5 * h)))]
 def topRightBound(x, y, w, h, cX, cY):
-    if cX < (x-w/2) and cX > x-(3*w):
-        if cY > y and cY < (y+(2*h)):
+    topRight = [x, y, x - int(round(1.5 * w)), y + int(round(1.5 * h))]
+    if cX < topRight[0] and cX > topRight[2]:
+        if cY > topRight[1] and cY < topRight[3]:
             return True
     else:
         return False
 
+
+# bottomLeft = [(x + int(round(1.5*w)), y + int(round(2.5 * h)) + (h / 2)), (x + (2 * w) + w, y + int(round(5.5 * h)))]
 def bottomLeftBound(x, y, w, h, cX, cY):
-    if cX > x+w+w/2 and cX < (x+(3*w)+w):
-        if cY > y+(2*h)+(h/2) and cY < (y+(5*h)):
+    bottomLeft = [x + int(round(1.5*w)), y + int(round(2.5 * h) + (h / 2)), x + (2 * w) + w, y + int(round(5.5 * h))]
+    if cX > bottomLeft[0] and cX < bottomLeft[2]:
+        if cY > bottomLeft[1] and cY < bottomLeft[3]:
             return True
     else:
         return False
 
+
+# bottomRight = [(x - int(round(w/2)), y + int(round(2.5 * h)) + (h / 2)), (x - (2 * w), y + int(round(5.5 * h)))]
 def bottomRightBound(x, y, w, h, cX, cY):
-    if cX < (x-w/2) and cX > x-(3*w):
-        if cY > y+(2*h)+(h/2) and cY < (y+(5*h)):
+    bottomRight = [x - int(round(w/2)), y + int(round(2.5 * h) + (h / 2)), x - (2 * w), y + int(round(5.5 * h))]
+    if cX > bottomRight[0] and cX < bottomRight[2]:
+        if cY > bottomRight[1] and cY < bottomRight[3]:
             return True
     else:
         return False
@@ -364,7 +372,6 @@ def getColor(_i):
         Person.setColor(_people[_i], 140, 0, 255) # Pink
     else:
         Person.setColor(_people[_i], 0, 0, 0)  # Black
-
 
 
 main()

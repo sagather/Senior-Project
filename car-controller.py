@@ -25,7 +25,7 @@ from clcomp import Client
 _face_cascade = cv2.CascadeClassifier('HaarCascades\haarcascade_frontalface_default.xml')
 
 # The starter video feed
-_originalFeed = cv2.VideoCapture(0)
+_originalFeed = cv2.VideoCapture(0 )
 
 # Global Variables
 _firstFrame = None
@@ -158,7 +158,7 @@ def faceDetection():
         cv2.rectangle(_frame, bottomRight[0], bottomRight[1], _people[_i].color, 2)
 
         # Call on the motion detection only if a face is detected
-        print("x: {} y: {} w: {} h: {} i:{}".format(x,y,w,h,_i))
+        #print("x: {} y: {} w: {} h: {} i:{}".format(x,y,w,h,_i))
         motionDetection(x, y, w, h, _i)
         _i = _i + 1
 
