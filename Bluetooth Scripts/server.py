@@ -9,99 +9,126 @@
 #   And then use ctrl+c to escape out, and the pi will be discoverable.  Run the bluetooth tester first, just to verify
 
 import bluetooth
-#import RPi.GPIO as gpio
+import RPi.GPIO as gpio
 import time
 
+# global vars
 s = None
 client = None
+validMacAddresses = ["18:cf:5e:9d:2c:3f","???"]
 
 def moveStop():
-        gpio.output(17, False)
+	# Stop the vehicle
+	gpio.output(17, False)
         gpio.output(27, False)
         gpio.output(19, False)
         gpio.output(26, False)
 
 def moveForward():
-        gpio.output(17, False)
-        gpio.output(27, True)
-        gpio.output(19, False)
-        gpio.output(26, True)
+	# Set the vehicle forward
+	gpio.output(17, False)
+	gpio.output(27, True)
+	gpio.output(19, False)
+	gpio.output(26, True)
 
 def moveReverse():
-        gpio.output(17, True)
-        gpio.output(27, False)
-        gpio.output(19, True)
-        gpio.output(26, False)
+	# Reverse the vehicle
+	gpio.output(17, True)
+	gpio.output(27, False)
+	gpio.output(19, True)
+	gpio.output(26, False)
 
 def moveRotateLeft():
-        gpio.output(17, True)
-        gpio.output(27, False)
+	# Rotate the vehicle left
+	gpio.output(17, True)
+	gpio.output(27, False)
         gpio.output(19, False)
-        gpio.output(26, True)
+	gpio.output(26, True)
 
 def moveRotateRight():
+	# Rotate the vehicle right
         gpio.output(17, False)
         gpio.output(27, True)
-        gpio.output(19, True)
-        gpio.output(26, False)
+	gpio.output(19, True)
+	gpio.output(26, False)
 
 def setupGPIOPins():
-        gpio.setmode(GPIO.BCM)
-        gpio.setwarnings(False)
-        gpio.setup(17, gpio.out)
-        gpio.setup(27, gpio.out)
-        gpio.setup(19, gpio.out)
-        gpio.setup(26, gpio.out)
-        gpio.output(17, False)
-        gpio.output(27, False)
-        gpio.output(19, False)
-        gpio.output(26, False)
+	# Setup the gpio pins
+	gpio.setmode(gpio.BCM)
+	gpio.setwarnings(False)
+	gpio.setup(17, gpio.OUT)
+	gpio.setup(27, gpio.OUT)
+	gpio.setup(19, gpio.OUT)
+	gpio.setup(26, gpio.OUT)
+	gpio.setup(23, gpio.OUT) #LED1
+	gpio.setup(24, gpio.OUT) #LED2
+	gpio.output(17, False)
+	gpio.output(27, False)
+	gpio.output(19, False)
+	gpio.output(26, False)
+	gpio.output(23, False)
+	gpio.output(24, False)
 
 def cleanUp():
-        if client != None:
-                print "Closing Socket"
-                client.close()
-        if s != None:
-                s.close()
-
-        print "Cleaning Up GPIO Pins"
-        gpio.cleanup()
-        print "Server Closed"
+	# Cleanup and close any open resources
+	if client != None:
+		print "Closing Socket"
+		client.close()
+	if s != None:
+		s.close()
+	print "Cleaning Up GPIO Pins"
+	gpio.cleanup()
+	print "Server Closed"
 
 print "Server Started"
 exit = 0
 while exit != 1:
-        setupGPIOPins()
-        port = 3
-        backlog = 1
-        size = 256
-        s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        s.bind(("", port))
-        s.listen(backlog)
-        try:
-                client, clientInfo = s.accept()
-                print "Client Has Connected"
-                data = "temp"
-                while data:
-                        data = client.recv(size)
-                        if data:
-                                print("Command Received: " + data)
-                        if data == "forward":
-                                moveForward()
-                        elif data == "reverse":
-                                moveReverse()
-                        elif data == "stop":
-                                moveStop()
-                        elif data == "left":
-                                moveRotateLeft()
-                        elif data == "right":
-                                moveRotateRight()
+	setupGPIOPins()
+	gpio.output(23, True)
+	port = 3
+	backlog = 1
+	size = 256
+	s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+	s.bind(("", port))
+	s.listen(backlog)
+	try:
+		client, clientInfo = s.accept()
 
-        except KeyboardInterrupt:
-                print "Closing Server..."
-                cleanUp()
-                exit = 1
+		# check if valid trusted connection
+		#remoteAddr, resVal = s.getpeername()
+		#ret = False
+		#for addr in validMacAddresses:
+		#	if remoteAddr == addr:
+		#		ret = True
+		#		break
+		#if not ret:
+		#	print("Error: Untrusted Client Tried To Connect")
+		#	raise RuntimeError("Untrusted Client")
 
-        except:
-                print "Error Occured - Restarting Server"
-                gpio.cleanup()
+		print "Client Has Connected"
+		gpio.output(24, True)
+		data = "temp"
+		while data:
+        		data = client.recv(size)
+        		if data:
+                		print("Command Received: " + data)
+			if data == "forward":
+				moveForward()
+			elif data == "reverse":
+				moveReverse()
+			elif data == "stop":
+				moveStop()
+			elif data == "left":
+				moveRotateLeft()
+			elif data == "right":
+				moveRotateRight()
+	except KeyboardInterrupt:
+		# Close the server
+		print "Closing Server..."
+		cleanUp()
+		exit = 1
+	except:
+		# An error occured, reinit the server
+		print "Error Occured - Restarting Server"
+		gpio.cleanup()
+
