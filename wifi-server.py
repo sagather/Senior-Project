@@ -121,7 +121,7 @@ while exit == 0:
         #Close Server
         print "Closing Server"
         cleanUp()
-        exit = 1;
+        exit = 1
 
     except:
         #Error, server restart
