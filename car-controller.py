@@ -37,7 +37,6 @@ _people = []
 _width = None
 _height = None
 _cur_surface = 0
-_difference =None
 _temp = None
 _grey_image = None
 _moving_average = None
@@ -247,7 +246,7 @@ def displayProcessing():
                 (10, _horizontal.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
     cv2.putText(_horizontal, "Faces in frame: {}".format(len(_people)), (10, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-    _client.send(_frameText)
+   # _client.send(_frameText)
 
     cv2.imshow("preview", _horizontal)
 

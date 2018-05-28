@@ -13,8 +13,8 @@ class Client:
 
     def __init__(self):
 
-        #serverMACAddress = "B8:27:EB:AA:E6:57"  #Cody's car
-        serverMACAddress = "B8:27:EB:9E:2A:D6"
+        serverMACAddress = "B8:27:EB:AA:E6:57"  #Stubaru
+        #serverMACAddress = "B8:27:EB:9E:2A:D6" #Tomyota
         port = 3
         #s = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         s.connect((serverMACAddress, port))
